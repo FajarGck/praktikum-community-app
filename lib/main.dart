@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tugas_akhir/Profile/halaman.profile.dart';
 import 'package:tugas_akhir/profile_fajar.dart';
 
 void main(List<String> args) {
@@ -26,7 +27,10 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("PROJEK AKHIR PMO TI23B")),
-      body: Column(children: [ProfileFajar()]),
+      body: SingleChildScrollView(
+        scrollDirection: Axis.vertical,
+        child: Column(children: [ProfileFajar(), Halamanprofile()]),
+      ),
     );
   }
 }
