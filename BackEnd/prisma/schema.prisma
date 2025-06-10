@@ -1,0 +1,98 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model favorit {
+  user_id    Int
+  modul_id   Int
+  created_at DateTime @default(now()) @db.DateTime(0)
+  modul      modul    @relation(fields: [modul_id], references: [modul_id], onDelete: Cascade, map: "fk_favorit_modul")
+  users      users    @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "fk_favorit_user")
+
+  @@id([user_id, modul_id])
+  @@index([modul_id], map: "idx_favorit_modul")
+}
+
+model kategori {
+  kategori_id   Int     @id @default(autoincrement())
+  nama_kategori String  @db.VarChar(100)
+  modul         modul[]
+}
+
+model komentar {
+  komentar_id    Int        @id @default(autoincrement())
+  modul_id       Int
+  user_id        Int
+  isi_komentar   String     @db.Text
+  parent_id      Int?
+  created_at     DateTime   @default(now()) @db.DateTime(0)
+  modul          modul      @relation(fields: [modul_id], references: [modul_id], onDelete: Cascade, map: "fk_komentar_modul")
+  komentar       komentar?  @relation("komentarTokomentar", fields: [parent_id], references: [komentar_id], map: "fk_komentar_parent")
+  other_komentar komentar[] @relation("komentarTokomentar")
+  users          users      @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "fk_komentar_user")
+
+  @@index([modul_id], map: "idx_komentar_modul")
+  @@index([parent_id], map: "idx_komentar_parent")
+  @@index([user_id], map: "idx_komentar_user")
+}
+
+model langkah {
+  langkah_id        Int     @id @default(autoincrement())
+  modul_id          Int
+  urutan            Int
+  deskripsi_langkah String  @db.Text
+  foto_langkah      String? @db.VarChar(255)
+  modul             modul   @relation(fields: [modul_id], references: [modul_id], onDelete: Cascade, map: "fk_langkah_modul")
+
+  @@index([modul_id, urutan], map: "idx_langkah_modul_urutan")
+}
+
+model modul {
+  modul_id      Int          @id @default(autoincrement())
+  judul         String       @db.VarChar(255)
+  thumbnail_url String?      @db.VarChar(255)
+  deskripsi     String?      @db.Text
+  kategori_id   Int
+  penulis_id    Int
+  created_at    DateTime     @default(now()) @db.DateTime(0)
+  updated_at    DateTime     @default(now()) @db.DateTime(0)
+  status        modul_status @default(pending)
+  favorit       favorit[]
+  komentar      komentar[]
+  langkah       langkah[]
+  kategori      kategori     @relation(fields: [kategori_id], references: [kategori_id], map: "fk_modul_kategori")
+  users         users        @relation(fields: [penulis_id], references: [user_id], map: "fk_modul_penulis")
+
+  @@index([kategori_id], map: "idx_modul_kategori")
+  @@index([penulis_id], map: "idx_modul_penulis")
+}
+
+model users {
+  user_id     Int        @id @default(autoincrement())
+  username    String     @db.VarChar(50)
+  password    String     @db.VarChar(255)
+  email       String     @unique(map: "ux_users_email") @db.VarChar(100)
+  foto_profil String?    @db.VarChar(255)
+  created_at  DateTime   @default(now()) @db.DateTime(0)
+  updated_at  DateTime   @default(now()) @db.DateTime(0)
+  role        users_role @default(user)
+  favorit     favorit[]
+  komentar    komentar[]
+  modul       modul[]
+}
+
+enum users_role {
+  admin
+  user
+}
+
+enum modul_status {
+  pending
+  reject
+  approved
+}
