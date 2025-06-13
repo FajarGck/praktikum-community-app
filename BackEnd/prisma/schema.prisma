@@ -74,7 +74,7 @@ model modul {
 
 model users {
   user_id     Int        @id @default(autoincrement())
-  username    String     @db.VarChar(50)
+  username    String     @unique(map: "ux_users_username") @db.VarChar(50)
   password    String     @db.VarChar(255)
   email       String     @unique(map: "ux_users_email") @db.VarChar(100)
   foto_profil String?    @db.VarChar(255)
