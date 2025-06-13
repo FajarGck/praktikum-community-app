@@ -28,13 +28,27 @@ const getUserById = async (userId) => {
     return user;
 }
 
-const createUser = async (userData, isAdmin = false) => {
-    
-    if (!userData) {
-        throw new Error('User data is required');
-       }
-    const hashPassword = await argon2.hash(userData.password);
+const getUserByEmail = async (userEmail) => {
+    if (!userEmail) {
+        throw new Error("Email is required");
+    }
+    const user = await userRepository.getUserByEmail(userEmail);
+    if (!user) {
+        throw new Error("Email is not registered");
+    }
+    return user;
+}
 
+const createUser = async (userData, isAdmin = false) => {
+    const hashPassword = await argon2.hash(userData.password);
+    const existingUser = await userRepository.getUserByUsername(userData.username);
+    const existingEmail = await userRepository.getUserByEmail(userData.email);
+    if (existingUser) {
+        throw new Error('Username already exists');
+    }
+    if (existingEmail) {
+        throw new Error('Email already exists');
+    }
     const dataToSave = {
         user_id: userData.user_id,
         username: userData.username,
@@ -46,7 +60,6 @@ const createUser = async (userData, isAdmin = false) => {
         updated_at: new Date(), 
     }
     const user = await userRepository.createUser(dataToSave);
-
     return user;
 }
 
@@ -55,6 +68,7 @@ const createUser = async (userData, isAdmin = false) => {
 module.exports = {
     getAllUser,
     getUserByUsername,
+    getUserByEmail,
     getUserById,
     createUser,
 }

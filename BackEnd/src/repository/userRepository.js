@@ -20,6 +20,14 @@ const getUserById = async (userId) => {
     })
 }
 
+const getUserByEmail = async (userEmail) => {
+    return await prisma.users.findUnique({
+        where: {
+            email: userEmail
+        }
+    })
+}
+
 const createUser = async (userData) => {
     return await prisma.users.create({
         data: {
@@ -39,6 +47,7 @@ const createUser = async (userData) => {
 module.exports = {
     getAllUser,
     getUserByUsername,
+    getUserByEmail,
     getUserById,
     createUser,
 }
