@@ -1,36 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:tugas_akhir/Profile/halaman.profile.dart';
-import 'package:tugas_akhir/profile_fajar.dart';
+import 'config/theme.dart';
+import 'routes/app_routes.dart';
 
 void main(List<String> args) {
-  runApp(MyApp());
+  runApp(Communityapp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class Communityapp extends StatelessWidget {
+  const Communityapp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(home: HomePage(), debugShowCheckedModeBanner: false);
-  }
-}
-
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
-
-  @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("PROJEK AKHIR PMO TI23B")),
-      body: SingleChildScrollView(
-        scrollDirection: Axis.vertical,
-        child: Column(children: [ProfileFajar(), Halamanprofile()]),
-      ),
+    return MaterialApp(
+      title: 'Community Praktikum',
+      theme: AppTheme.lightTheme,
+      initialRoute: AppRoutes.login,
+      debugShowCheckedModeBanner: false,
+      routes: AppRoutes.routes,
     );
   }
 }
