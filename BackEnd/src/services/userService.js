@@ -49,6 +49,13 @@ const createUser = async (userData, isAdmin = false) => {
     if (existingEmail) {
         throw new Error('Email already exists');
     }
+    if (!userData.username) {
+        throw new Error('Username is required');
+    } if (!userData.email) {
+        throw new Error('Email is required');
+    }if (!userData.password) {
+        throw new Error('Password is required');
+    }
     const dataToSave = {
         user_id: userData.user_id,
         username: userData.username,
