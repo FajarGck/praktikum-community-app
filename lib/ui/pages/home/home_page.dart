@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:tugas_akhir/provider/auth_provider.dart';
 import '../../../config/theme.dart';
 import '../../../routes/app_routes.dart';
 
@@ -13,7 +15,6 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
 
-  //dummy data sebelum konek database
   final List<String> categories = [
     "Pemrograman Mobile",
     "Pemrograman Website",
@@ -21,7 +22,6 @@ class _HomePageState extends State<HomePage> {
     "Basis Data",
   ];
 
-  // sebelum konek database
   final List<Map<String, String>> recentPosts = [
     {
       'title': 'Pengenalan OOP',
@@ -55,11 +55,15 @@ class _HomePageState extends State<HomePage> {
       case 3:
         Navigator.pushNamed(context, AppRoutes.profile);
         break;
+      case 4:
+        Navigator.pushNamed(context, AppRoutes.admin);
+        break;
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthProvider>();
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppTheme.primaryColor,
@@ -103,36 +107,40 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(height: 24),
 
               // Kategori Modul
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              Column(
                 children: [
-                  Text(
-                    "Kategori Modul",
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Kategori Modul",
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        "See all",
+                        style: TextStyle(color: AppTheme.primaryColor),
+                      ),
+                    ],
                   ),
-                  Text(
-                    "See all",
-                    style: TextStyle(color: AppTheme.primaryColor),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    children:
+                        categories.map((category) {
+                          return Chip(
+                            label: Text(category),
+                            backgroundColor: const Color(0xFFEDEDED),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          );
+                        }).toList(),
                   ),
                 ],
-              ),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                children:
-                    categories.map((category) {
-                      return Chip(
-                        label: Text(category),
-                        backgroundColor: const Color(0xFFEDEDED),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      );
-                    }).toList(),
               ),
               const SizedBox(height: 32),
 
@@ -258,11 +266,17 @@ class _HomePageState extends State<HomePage> {
         onTap: _onItemTapped,
         selectedItemColor: AppTheme.primaryColor,
         unselectedItemColor: Colors.grey,
-        items: const [
+        items: [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.menu_book), label: 'Module'),
           BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Authors'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+          if (auth.authData?.user.role == 'admin') ...[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.admin_panel_settings),
+              label: 'Admin',
+            ),
+          ],
         ],
       ),
     );

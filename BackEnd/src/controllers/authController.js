@@ -28,7 +28,12 @@ const login = async (req, res) => {
         const payload = {
             user_id : user.user_id,
             username: user.username,
-            role: user.role
+            email: user.email,
+            role: user.role,
+            foto_profil: user.foto_profil,
+            created_at: user.created_at,
+            updated_at: user.updated_at,
+            
         };
 
         const token = jwt.sign(
@@ -46,8 +51,8 @@ const login = async (req, res) => {
         });
     } catch (error) {
         res.status(500).json({
-            code: 500,
-            message: error.message + ' error🥴'
+            code: 404,
+            message: error.message
         });
     }
 }

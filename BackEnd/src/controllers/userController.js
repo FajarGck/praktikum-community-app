@@ -56,7 +56,7 @@ const getUserByUsername = async (req, res) => {
 
 const createUser = async (req, res) => {
     const { username, password, email } = req.body;
-    const fotoProfile = req.file ? `/public/images/users/${req.file.filename}` : null;
+    const fotoProfile = req.file ? `/public/images/users/${req.file.filename}` : '/public/images/users/profile.png';
     try {
         const user = await userService.createUser({
             username, password, email, foto_profil: fotoProfile
