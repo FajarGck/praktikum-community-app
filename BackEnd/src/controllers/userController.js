@@ -5,10 +5,11 @@ const userService = require('../services/userService');
 const getAllUser = async (req, res) => {
     const users = await userService.getAllUser();
     try {
+        const filteredAllUser = users.map(filterUsersResponse);    
         res.status(200).json({
             code: '200',
             message: 'ok!',
-            data: users
+            data: filteredAllUser
         })
     } catch (error) {
         res.status(400).json({
@@ -76,7 +77,7 @@ const createUser = async (req, res) => {
 
 const createAdminUser = async (req, res) => {
     const { username, password, email, role } = req.body;
-    const fotoProfile = req.file ? `/public/images/users/${req.file.filename}` : null;
+    const fotoProfile = req.file ? `/public/images/users/${req.file.filename}` : '/public/images/users/profile.png';
     try {
         const user = await userService.createUser({
             username, password, email, foto_profil: fotoProfile, role

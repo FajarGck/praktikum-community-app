@@ -39,7 +39,7 @@ const login = async (req, res) => {
         const token = jwt.sign(
             payload,
             TOKEN_SECRET,
-            { expiresIn: '1h' }
+            { expiresIn: '10m' }
         )
         res.status(200).json({
             code: 200,

@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:tugas_akhir/models/auth_response.dart';
 import 'package:tugas_akhir/models/user_model.dart';
@@ -59,24 +58,22 @@ class AuthService {
 
   Future<UsersModel> getUserProfile(String token) async {
     final uri = Uri.parse(ApiEndpoints.me);
-    try {
-      final response = await http.get(
-        uri,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
+    final response = await http.get(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final data = jsonDecode(response.body) as Map<String, dynamic>;
-        debugPrint("$data");
-        return UsersModel.fromJson(data);
-      } else {
-        throw Exception('Failed to load user profile ${response.statusCode}');
-      }
-    } catch (e) {
-      throw Exception('Failed to load user profile');
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      print("✅ Profil berhasil dimuat: $data");
+      return UsersModel.fromJson(data);
+    } else {
+      final responseData = jsonDecode(response.body);
+      final errorMessage = responseData['message'] ?? 'Gagal memuat profil';
+      throw Exception('Error $errorMessage - Status: ${response.statusCode}');
     }
   }
 }
