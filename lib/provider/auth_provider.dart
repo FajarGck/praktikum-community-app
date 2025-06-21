@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:tugas_akhir/models/auth_response.dart';
+import 'package:tugas_akhir/provider/author_provider.dart';
+import 'package:tugas_akhir/provider/kategori_provider.dart';
 import 'package:tugas_akhir/service/auth_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -22,7 +25,7 @@ class AuthProvider with ChangeNotifier {
     required String email,
     required String password,
   }) async {
-    _loading = false;
+    _loading = true;
     notifyListeners();
     try {
       await _service.register(
@@ -31,7 +34,7 @@ class AuthProvider with ChangeNotifier {
         email: email,
       );
     } catch (e) {
-      throw e.toString();
+      rethrow;
     } finally {
       _loading = false;
       notifyListeners();
@@ -44,7 +47,15 @@ class AuthProvider with ChangeNotifier {
     return _token;
   }
 
+  Future<void> _onLoginSuccess(BuildContext context, String token) async {
+    await Future.wait([
+      context.read<AuthorProvider>().fetchAuthor(token),
+      context.read<KategoriProvider>().fetchKategori(token),
+    ]);
+  }
+
   Future<void> login({
+    required BuildContext context,
     required String username,
     required String password,
   }) async {
@@ -54,6 +65,7 @@ class AuthProvider with ChangeNotifier {
       _authData = data;
       _token = data.token;
       await _storage.write(key: 'jwt_token', value: _token);
+      await _onLoginSuccess(context, _token!);
     } catch (e) {
       rethrow;
     } finally {
@@ -61,7 +73,14 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<void> autoLogin() async {
+  Future<void> logout() async {
+    _token = null;
+    _authData = null;
+    await _storage.delete(key: 'jwt_token');
+    notifyListeners();
+  }
+
+  Future<void> autoLogin({required BuildContext context}) async {
     _loading = true;
     notifyListeners();
     try {
@@ -70,11 +89,15 @@ class AuthProvider with ChangeNotifier {
         final data = await _service.getUserProfile(savedToken);
         _token = savedToken;
         _authData = AuthResponse(token: savedToken, user: data);
+        await _onLoginSuccess(context, _token!);
         print('✅ profile loaded: ${_authData!.user.username}');
+      } else {
+        print("😓 token not found");
       }
     } catch (e) {
       _token = null;
       _authData = null;
+      print('❌ Auto-login gagal dengan error: $e');
     } finally {
       _loading = false;
       notifyListeners();

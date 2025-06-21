@@ -73,6 +73,7 @@ class _LoginPageState extends State<LoginPage> {
                     onPressed: () async {
                       try {
                         await auth.login(
+                          context: context,
                           username: _usernameController.text,
                           password: _passwordController.text,
                         );
@@ -92,9 +93,11 @@ class _LoginPageState extends State<LoginPage> {
                           );
                         }
                       } catch (e) {
-                        ScaffoldMessenger.of(
-                          context,
-                        ).showSnackBar(SnackBar(content: Text(e.toString())));
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(
+                            context,
+                          ).showSnackBar(SnackBar(content: Text(e.toString())));
+                        }
                       }
                     },
                     child: Text(

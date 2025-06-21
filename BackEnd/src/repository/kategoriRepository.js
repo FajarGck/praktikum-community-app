@@ -1,7 +1,11 @@
 const prisma = require('../config/db');
 
 const getAllKategori = async () => {
-    return await prisma.kategori.findMany();
+    return await prisma.kategori.findMany({
+        orderBy: {
+            nama_kategori: 'asc'
+        }
+    });
 }
 
 const getKategoriById = async (kategoriId) => {

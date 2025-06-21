@@ -1,7 +1,11 @@
 const prisma = require('../config/db');
 
 const getAllUser = async () => {
-    return await prisma.users.findMany();
+    return await prisma.users.findMany({
+        orderBy: {
+            created_at: 'desc'
+        }
+    });
 }
 
 const getUserByUsername = async (username) => {

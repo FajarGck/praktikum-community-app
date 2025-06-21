@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:tugas_akhir/ui/pages/auth/create_admin.dart';
 import 'package:tugas_akhir/ui/pages/authors/admin_page.dart';
+import 'package:tugas_akhir/ui/pages/kategori/kategori_page.dart';
 
 // Import semua halaman yang akan digunakan
 import '../ui/pages/auth/login_page.dart';
@@ -27,6 +29,8 @@ class AppRoutes {
   static const String listmodul = '/module-list';
   static const String authors = '/authors';
   static const String admin = '/admin';
+  static const String kategori = '/kategori';
+  static const String createAdmin = '/create-admin';
 
   //daftar root biar lebih terstruktur
   static final Map<String, WidgetBuilder> routes = {
@@ -34,13 +38,15 @@ class AppRoutes {
     register: (context) => const RegisterPage(),
     home: (context) => const HomePage(),
     admin: (context) => const AdminPage(),
+    profile: (context) => const ProfilePage(),
+    authors: (context) => const AuthorsPage(),
+    kategori: (context) => const KategoriPage(),
+    createAdmin: (context) => const CreateAdmin(),
     // createModul: (context) => const CreateModulPage(),
     // detailModul: (context) => const DetailModulPage(),
     // komentar: (context) => const KomentarPage(),
-    // profile: (context) => const ProfilePage(),
     // editProfile: (context) => const EditProfilePage(),
     // search: (context) => const SearchPage(),
     // listmodul: (context) => const ModuleListPage(),
-    // authors: (context) => const AuthorsPage(),
   };
 }
