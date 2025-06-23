@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:tugas_akhir/config/api.dart';
 import 'package:tugas_akhir/provider/auth_provider.dart';
 import 'package:tugas_akhir/provider/modul_provider.dart';
+import 'package:tugas_akhir/routes/app_routes.dart';
 import 'package:tugas_akhir/ui/widgets/komentar_card.dart';
 
 class DetailModulPage extends StatefulWidget {
@@ -14,11 +15,12 @@ class DetailModulPage extends StatefulWidget {
 }
 
 class _DetailModulPageState extends State<DetailModulPage> {
-  TextEditingController _komentarController = TextEditingController();
+  final TextEditingController _komentarController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
+    // Mengambil data detail modul saat halaman pertama kali dibuka
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       Provider.of<ModulProvider>(
@@ -29,18 +31,59 @@ class _DetailModulPageState extends State<DetailModulPage> {
   }
 
   @override
+  void dispose() {
+    _komentarController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // Ambil data user yang sedang login untuk perbandingan ID
     final auth = context.read<AuthProvider>();
+    final loggedInUserId = auth.authData?.user.userId;
     final token = auth.token!;
+
     return Scaffold(
-      appBar: AppBar(title: const Text("Detail Modul")),
-      // Gunakan Consumer untuk mendapatkan data dari ModulProvider
+      // === BAGIAN YANG DIUBAH ADA DI APPBAR INI ===
+      appBar: AppBar(
+        title: const Text("Detail Modul"),
+        actions: [
+          // Consumer ini akan me-render ulang tombol Edit saat data modul sudah siap
+          Consumer<ModulProvider>(
+            builder: (context, provider, child) {
+              final modul = provider.detailModul;
+
+              // Tampilkan tombol Edit HANYA jika:
+              // 1. Data modul sudah ter-load (modul != null)
+              // 2. ID user yang login SAMA DENGAN ID penulis modul
+              if (modul != null && loggedInUserId == modul.penulis?.userId) {
+                return IconButton(
+                  icon: const Icon(Icons.edit),
+                  tooltip: 'Edit Modul',
+                  onPressed: () {
+                    // Navigasi ke halaman Edit, kirim seluruh data modul sebagai argumen
+                    Navigator.pushNamed(
+                      context,
+                      AppRoutes.editModul,
+                      arguments: modul,
+                    );
+                  },
+                );
+              }
+              // Jika kondisi tidak terpenuhi, jangan tampilkan apa-apa
+              return const SizedBox.shrink();
+            },
+          ),
+        ],
+      ),
+
+      //==============================================
       body: Consumer<ModulProvider>(
         builder: (context, provider, child) {
-          if (provider.isLoading) {
+          if (provider.isLoading && provider.detailModul == null) {
             return const Center(child: CircularProgressIndicator());
           }
-          if (provider.errorMessage != null) {
+          if (provider.errorMessage != null && provider.detailModul == null) {
             return Center(child: Text(provider.errorMessage!));
           }
 
@@ -97,7 +140,6 @@ class _DetailModulPageState extends State<DetailModulPage> {
                   ],
                 ),
                 const Divider(height: 32),
-
                 const Text(
                   "Deskripsi",
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -105,7 +147,6 @@ class _DetailModulPageState extends State<DetailModulPage> {
                 const SizedBox(height: 8),
                 Text(modul.deskripsi ?? 'Tidak ada deskripsi.'),
                 const SizedBox(height: 24),
-
                 const Text(
                   "Langkah-langkah Project",
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -142,8 +183,6 @@ class _DetailModulPageState extends State<DetailModulPage> {
                         }).toList(),
                   ),
                 const SizedBox(height: 24),
-
-                // komentar
                 Text(
                   "Komentar (${modul.komentar?.length ?? 0})",
                   style: const TextStyle(

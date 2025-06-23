@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/widgets.dart';
 import 'package:tugas_akhir/models/modul_model.dart';
 import 'package:tugas_akhir/service/komentar_service.dart';
@@ -146,5 +147,71 @@ class ModulProvider with ChangeNotifier {
     _successMessage = null;
     _isLoading = false;
     notifyListeners();
+  }
+
+  Future<bool> createModul({
+    required String token,
+    required String judul,
+    required String deskripsi,
+    required int kategoriId,
+    required File thumbnailImage,
+    required List<Map<String, dynamic>> langkah,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+    try {
+      await _service.createModul(
+        token: token,
+        judul: judul,
+        deskripsi: deskripsi,
+        kategoriId: kategoriId,
+        thumbnailImage: thumbnailImage,
+        langkah: langkah,
+      );
+      await fetchModul(token);
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> updateModul({
+    required String token,
+    required int modulId,
+    required String judul,
+    required String deskripsi,
+    required int kategoriId,
+    File? thumbnailImage,
+    required List<Map<String, dynamic>> langkah,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+    try {
+      await _service.updateModul(
+        token: token,
+        modulId: modulId,
+        judul: judul,
+        deskripsi: deskripsi,
+        kategoriId: kategoriId,
+        thumbnailImage: thumbnailImage,
+        langkah: langkah,
+      );
+      _successMessage = "Modul berhasil diperbarui";
+      await fetchModul(token);
+      await fetchDetailModul(token, modulId);
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 }

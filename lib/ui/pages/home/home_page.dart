@@ -4,10 +4,11 @@ import 'package:provider/provider.dart';
 import 'package:tugas_akhir/provider/auth_provider.dart';
 import 'package:tugas_akhir/provider/author_provider.dart';
 import 'package:tugas_akhir/provider/kategori_provider.dart';
+import 'package:tugas_akhir/provider/modul_provider.dart';
 import 'package:tugas_akhir/ui/widgets/authors_list.dart';
 import 'package:tugas_akhir/ui/widgets/kategori_list.dart';
+import 'package:tugas_akhir/ui/widgets/modul_list.dart';
 import '../../../config/theme.dart';
-import '../../../provider/modul_provider.dart';
 import '../../../routes/app_routes.dart';
 
 class HomePage extends StatefulWidget {
@@ -20,100 +21,37 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
 
-  final TextEditingController _searchController = TextEditingController();
+  // Controller untuk mengelola input teks dan fokus keyboard
+  final _searchController = TextEditingController();
+  final _searchFocusNode = FocusNode();
 
   @override
   void dispose() {
+    // Selalu dispose controller untuk menghindari memory leak
     _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 
-  final List<String> categories = [
-    "Pemrograman Mobile",
-    "Pemrograman Website",
-    "Pemrograman Berbasis Event",
-    "Basis Data",
-  ];
+  // Fungsi untuk menjalankan pencarian dan navigasi
+  void _performSearch(String query) {
+    if (query.trim().isNotEmpty) {
+      _searchFocusNode.unfocus(); // Sembunyikan keyboard setelah search
+      final authProvider = context.read<AuthProvider>();
 
-  final List<Map<String, String>> recentPosts = [
-    {
-      'title': 'Pengenalan OOP',
-      'desc': 'OOP adalah paradigma pemrograman berbasis objek...',
-      'author': 'Reza Pambudi',
-    },
-    {
-      'title': 'Fetching API',
-      'desc': 'OOP adalah pendekatan modular untuk data...',
-      'author': 'Reza Pambudi',
-    },
-  ];
-
-  final List<Map<String, dynamic>> authors = [
-    {
-      "user_id": 23,
-      "username": "Gwen",
-      "email": "guys@gmail.com",
-      "foto_profil":
-          "/public/images/users/1749808114618-e334cb95-8b3c-4b26-be17-bc6529f1d5c9.jpg",
-      "created_at": "2025-06-13T09:48:34.000Z",
-      "updated_at": "2025-06-13T09:48:34.000Z",
-      "role": "admin",
-    },
-    {
-      "user_id": 44,
-      "username": "Alfred",
-      "email": "alf@gmail.com",
-      "foto_profil": "/public/images/users/profile.png",
-      "created_at": "2025-06-17T05:13:38.000Z",
-      "updated_at": "2025-06-17T05:13:38.000Z",
-      "role": "user",
-    },
-    {
-      "user_id": 45,
-      "username": "Baru",
-      "email": "baru@gmail.com",
-      "foto_profil": "/public/images/users/profile.png",
-      "created_at": "2025-06-17T13:10:38.000Z",
-      "updated_at": "2025-06-17T13:10:38.000Z",
-      "role": "user",
-    },
-    {
-      "user_id": 46,
-      "username": "Gwendi",
-      "email": "a@gmail.com",
-      "foto_profil": "/public/images/users/profile.png",
-      "created_at": "2025-06-17T15:39:23.000Z",
-      "updated_at": "2025-06-17T15:39:23.000Z",
-      "role": "user",
-    },
-    {
-      "user_id": 47,
-      "username": "Alvin14",
-      "email": "alvin@gmail.com",
-      "foto_profil": "/public/images/users/profile.png",
-      "created_at": "2025-06-18T13:54:32.000Z",
-      "updated_at": "2025-06-18T13:54:32.000Z",
-      "role": "user",
-    },
-    {
-      "user_id": 48,
-      "username": "Dendy11",
-      "email": "dendy@gmail.com",
-      "foto_profil": "/public/images/users/profile.png",
-      "created_at": "2025-06-18T13:55:15.000Z",
-      "updated_at": "2025-06-18T13:55:15.000Z",
-      "role": "user",
-    },
-    {
-      "user_id": 49,
-      "username": "Emyl",
-      "email": "emyl@gmail.com",
-      "foto_profil": "/public/images/users/profile.png",
-      "created_at": "2025-06-18T13:55:35.000Z",
-      "updated_at": "2025-06-18T13:55:35.000Z",
-      "role": "user",
-    },
-  ];
+      context
+          .read<ModulProvider>()
+          .searchModul(token: authProvider.token!, query: query)
+          .then((_) {
+            // Setelah data hasil pencarian siap di provider, baru navigasi
+            Navigator.pushNamed(
+              context,
+              AppRoutes.searchResult,
+              arguments: query,
+            );
+          });
+    }
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -133,7 +71,9 @@ class _HomePageState extends State<HomePage> {
         Navigator.pushNamed(context, AppRoutes.profile);
         break;
       case 4:
-        Navigator.pushNamed(context, AppRoutes.admin);
+        if (context.read<AuthProvider>().authData?.user.role == 'admin') {
+          Navigator.pushNamed(context, AppRoutes.admin);
+        }
         break;
     }
   }
@@ -143,7 +83,8 @@ class _HomePageState extends State<HomePage> {
     final auth = context.watch<AuthProvider>();
     final author = context.watch<AuthorProvider>();
     final kategori = context.watch<KategoriProvider>();
-    final role = auth.authData?.user.role;
+    final modul = context.watch<ModulProvider>();
+
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppTheme.primaryColor,
@@ -167,26 +108,15 @@ class _HomePageState extends State<HomePage> {
               ),
               const SizedBox(height: 20),
 
-              // Search Field
+              // === BAGIAN SEARCH FIELD YANG SUDAH DIGABUNGKAN ===
               TextField(
                 controller: _searchController,
-                onSubmitted: (value) {
-                  if (value.isNotEmpty) {
-                    final token = context.read<AuthProvider>().token;
-                    context.read<ModulProvider>().searchModul(
-                      token: token!,
-                      query: value,
-                    );
-                    Navigator.pushNamed(
-                      context,
-                      AppRoutes.searchResult,
-                      arguments: value,
-                    );
-                  }
-                },
+                focusNode: _searchFocusNode,
+                textInputAction: TextInputAction.search,
+                onSubmitted: (value) => _performSearch(value),
                 decoration: InputDecoration(
                   prefixIcon: const Icon(Icons.search),
-                  hintText: 'Search',
+                  hintText: 'Cari modul...',
                   filled: true,
                   fillColor: const Color(0xFFF5F5F5),
                   contentPadding: const EdgeInsets.symmetric(
@@ -197,10 +127,18 @@ class _HomePageState extends State<HomePage> {
                     borderRadius: BorderRadius.circular(16),
                     borderSide: BorderSide.none,
                   ),
+                  // Menambahkan tombol kirim untuk memicu search juga
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.send),
+                    onPressed: () => _performSearch(_searchController.text),
+                  ),
                 ),
               ),
+
+              // ============================================
               const SizedBox(height: 24),
-              // Kategori Modul
+
+              // Kategori Modul (tidak berubah)
               Column(
                 children: [
                   Row(
@@ -230,7 +168,7 @@ class _HomePageState extends State<HomePage> {
               ),
               const SizedBox(height: 32),
 
-              // Post Terbaru
+              // Post Terbaru (tidak berubah)
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -241,65 +179,25 @@ class _HomePageState extends State<HomePage> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Text(
-                    "See all",
-                    style: TextStyle(color: AppTheme.primaryColor),
+                  GestureDetector(
+                    onTap:
+                        () => Navigator.pushNamed(context, AppRoutes.listmodul),
+                    child: Text(
+                      "See all",
+                      style: TextStyle(color: AppTheme.primaryColor),
+                    ),
                   ),
                 ],
               ),
               const SizedBox(height: 12),
-              SizedBox(
-                height: 160,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: recentPosts.length,
-                  separatorBuilder:
-                      (context, index) => const SizedBox(width: 12),
-                  itemBuilder: (context, index) {
-                    final post = recentPosts[index];
-                    return Container(
-                      width: 220,
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF3F3F3),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            post['title']!,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            post['desc']!,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontSize: 13),
-                          ),
-                          const Spacer(),
-                          Row(
-                            children: [
-                              const Icon(Icons.person, size: 16),
-                              const SizedBox(width: 4),
-                              Text(
-                                post['author']!,
-                                style: const TextStyle(fontSize: 12),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
+              ModulList(
+                listModul: modul.modulList,
+                direction: Axis.horizontal,
+                maxItems: 5,
               ),
               const SizedBox(height: 32),
-              //author
+
+              // Authors (tidak berubah)
               Column(
                 children: [
                   Row(
@@ -314,10 +212,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                       GestureDetector(
                         onTap: () {
-                          Navigator.pushReplacementNamed(
-                            context,
-                            AppRoutes.authors,
-                          );
+                          Navigator.pushNamed(context, AppRoutes.authors);
                         },
                         child: Text(
                           "See all",
