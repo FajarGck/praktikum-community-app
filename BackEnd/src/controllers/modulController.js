@@ -52,8 +52,27 @@ const getDetailModulById = async (req, res) => {
     }
 }
 
+const searchModul = async (req, res) => {
+    const { judul } = req.query;
+
+    try {
+        const modules = await modulServcie.searchModul(judul);
+        res.status(200).json({
+            code: 200,
+            message: 'ok!',
+            data: modules
+        });
+    } catch (error) {
+        res.status(400).json({
+            code: 400,
+            message: error.message
+        });
+    }
+}
+
 module.exports = {
     getAllModulCard,
     getModulCardById,
-    getDetailModulById
+    getDetailModulById,
+    searchModul
 }

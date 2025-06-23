@@ -19,4 +19,6 @@ class ApiEndpoints {
   static String userById(int id) => '$baseUrl/users/$id';
   static String getDetailModulById(int id) => '$baseUrl/modul/$id';
   static String getCardModulByUserId(int id) => '$baseUrl/modul/card/$id';
+  static String searchModul(String query) =>
+      '$baseUrl/modul/search?judul=$query';
 }
