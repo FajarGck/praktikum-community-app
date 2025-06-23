@@ -7,6 +7,7 @@ import 'package:tugas_akhir/provider/kategori_provider.dart';
 import 'package:tugas_akhir/ui/widgets/authors_list.dart';
 import 'package:tugas_akhir/ui/widgets/kategori_list.dart';
 import '../../../config/theme.dart';
+import '../../../provider/modul_provider.dart';
 import '../../../routes/app_routes.dart';
 
 class HomePage extends StatefulWidget {
@@ -18,6 +19,14 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
+
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   final List<String> categories = [
     "Pemrograman Mobile",
@@ -160,6 +169,21 @@ class _HomePageState extends State<HomePage> {
 
               // Search Field
               TextField(
+                controller: _searchController,
+                onSubmitted: (value) {
+                  if (value.isNotEmpty) {
+                    final token = context.read<AuthProvider>().token;
+                    context.read<ModulProvider>().searchModul(
+                      token: token!,
+                      query: value,
+                    );
+                    Navigator.pushNamed(
+                      context,
+                      AppRoutes.searchResult,
+                      arguments: value,
+                    );
+                  }
+                },
                 decoration: InputDecoration(
                   prefixIcon: const Icon(Icons.search),
                   hintText: 'Search',

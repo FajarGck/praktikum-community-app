@@ -15,6 +15,7 @@ import '../ui/pages/profile/profile_page.dart';
 import '../ui/pages/search/search_page.dart';
 import '../ui/pages/modul/module_list_page.dart';
 import '../ui/pages/authors/authors_page.dart';
+import '../ui/pages/search/search_result_page.dart';
 
 class AppRoutes {
   static const String login = '/login';
@@ -31,6 +32,7 @@ class AppRoutes {
   static const String admin = '/admin';
   static const String kategori = '/kategori';
   static const String createAdmin = '/create-admin';
+  static const String searchResult = '/search-result';
 
   //daftar root biar lebih terstruktur
   static final Map<String, WidgetBuilder> routes = {
@@ -48,6 +50,10 @@ class AppRoutes {
       final settings = ModalRoute.of(context)!.settings;
       final modulId = settings.arguments as int;
       return DetailModulPage(modulId: modulId);
+    },
+    searchResult: (context) {
+      final query = ModalRoute.of(context)!.settings.arguments as String;
+      return SearchResultPage(searchQuery: query);
     },
     // createModul: (context) => const CreateModulPage(),
     // detailModul: (context) => const DetailModulPage(),

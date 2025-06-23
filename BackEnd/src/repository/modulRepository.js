@@ -97,10 +97,45 @@ const getDetailModulById = async (modulId) =>{
     })
 }
 
+const searchModulByJudul = async (searchTerm) => {
+    return await prisma.modul.findMany({
+        where: {
+            judul: {
+                contains: searchTerm,
+                mode: 'insensitive' 
+            },
+            status: 'approved' 
+        },
+        orderBy: {
+            created_at: 'desc'
+        },
+        select: {
+            modul_id: true,
+            judul: true,
+            deskripsi: true,
+            thumbnail_url: true,
+            created_at: true,
+            penulis: {
+                select: {
+                    user_id: true,
+                    username: true,
+                    foto_profil: true
+                }
+            },
+            kategori: {
+                select: {
+                    kategori_id: true,
+                    nama_kategori: true
+                }
+            }
+        }
+    });
+}
 
 
 module.exports = {
     getAllModulCard,
     getDetailModulById,
-    getModulCardById
+    getModulCardById,
+    searchModulByJudul
 }

@@ -21,6 +21,12 @@ class ModulProvider with ChangeNotifier {
   String? get errorMessage => _errorMessage;
   String? get successMessage => _successMessage;
 
+  bool _isSearching = false;
+  List<ModulModel> _searchResultList = [];
+
+  bool get isSearching => _isSearching;
+  List<ModulModel> get searchResultList => _searchResultList;
+
   Future<void> fetchModul(String? token) async {
     if (token == null) {
       _errorMessage = "Token tidak valid";
@@ -106,6 +112,30 @@ class ModulProvider with ChangeNotifier {
       return false;
     } finally {
       _isKomentar = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> searchModul({
+    required String token,
+    required String query,
+  }) async {
+    if (query.isEmpty) {
+      _searchResultList = [];
+      notifyListeners();
+      return;
+    }
+
+    _isSearching = true;
+    _errorMessage = null;
+    notifyListeners();
+    try {
+      final result = await _service.searchModul(token, query);
+      _searchResultList = result;
+    } catch (e) {
+      _errorMessage = e.toString();
+    } finally {
+      _isSearching = false;
       notifyListeners();
     }
   }

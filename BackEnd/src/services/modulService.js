@@ -1,6 +1,4 @@
-const { modul } = require('../config/db');
 const modulRepository = require('../repository/modulRepository');
-
 
 const getAllModulCard = async () => {
     return await modulRepository.getAllModulCard();
@@ -27,8 +25,20 @@ const getDetailModulById = async (modulId) => {
     return modul;
 }
 
+const searchModul = async (searchTerm) => {
+   
+    if (!searchTerm) {
+  
+        return [];
+    }
+  
+    const modules = await searchModulByJudul(searchTerm);
+    return modules;
+}
+
 module.exports = {
     getAllModulCard,
     getModulCardById,
-    getDetailModulById
+    getDetailModulById,
+    searchModul
 }
