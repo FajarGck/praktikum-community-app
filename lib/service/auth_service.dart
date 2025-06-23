@@ -56,6 +56,32 @@ class AuthService {
     }
   }
 
+  Future<UsersModel> updateUser({
+    required String token,
+    required int id,
+    required Map<String, dynamic> data,
+  }) async {
+    final uri = Uri.parse('${ApiEndpoints.getAllAuthor}/$id');
+    final response = await http.patch(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode(data),
+    );
+
+    final responseData = jsonDecode(response.body) as Map<String, dynamic>;
+
+    if (response.statusCode == 200) {
+      final data = responseData['data'];
+      return UsersModel.fromJson(data);
+    } else {
+      final message = responseData['message'];
+      throw message;
+    }
+  }
+
   Future<UsersModel> getUserProfile(String token) async {
     final uri = Uri.parse(ApiEndpoints.me);
     final response = await http.get(

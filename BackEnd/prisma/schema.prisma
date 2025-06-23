@@ -34,7 +34,7 @@ model komentar {
   modul          modul      @relation(fields: [modul_id], references: [modul_id], onDelete: Cascade, map: "fk_komentar_modul")
   komentar       komentar?  @relation("komentarTokomentar", fields: [parent_id], references: [komentar_id], map: "fk_komentar_parent")
   other_komentar komentar[] @relation("komentarTokomentar")
-  users          users      @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "fk_komentar_user")
+  penulis          users      @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "fk_komentar_user")
 
   @@index([modul_id], map: "idx_komentar_modul")
   @@index([parent_id], map: "idx_komentar_parent")
@@ -66,7 +66,7 @@ model modul {
   komentar      komentar[]
   langkah       langkah[]
   kategori      kategori     @relation(fields: [kategori_id], references: [kategori_id], map: "fk_modul_kategori")
-  users         users        @relation(fields: [penulis_id], references: [user_id], map: "fk_modul_penulis")
+  penulis         users        @relation(fields: [penulis_id], references: [user_id], map: "fk_modul_penulis")
 
   @@index([kategori_id], map: "idx_modul_kategori")
   @@index([penulis_id], map: "idx_modul_penulis")

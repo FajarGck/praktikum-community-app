@@ -41,60 +41,6 @@ class _AdminPageState extends State<AdminPage> {
     }
   }
 
-  final List<Map<String, String>> publications = [
-    {
-      'title': 'Pengenalan Widget Dasar',
-      'desc': 'Dalam Flutter, widget adalah blok bangunan utama...',
-      'author': 'Reza Pambudi',
-    },
-  ];
-
-  final List<Map<String, String>> bookmarks = [
-    {
-      'title': 'Pengenalan Mapping List',
-      'desc': 'Mapping List digunakan untuk mengelola koleksi data...',
-      'author': 'Reza Pambudi',
-    },
-  ];
-  Widget buildModuleCard(Map<String, String> data) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF5F5F5),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.all(12),
-        title: Text(
-          data['title']!,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 4),
-            Text(data['desc']!, maxLines: 2, overflow: TextOverflow.ellipsis),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                const Icon(Icons.person, size: 16),
-                const SizedBox(width: 4),
-                Text(data['author']!, style: const TextStyle(fontSize: 12)),
-              ],
-            ),
-          ],
-        ),
-        trailing: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Icon(Icons.bookmark_border, color: AppTheme.primaryColor),
-            SizedBox(height: 8),
-          ],
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -122,7 +68,7 @@ class _AdminPageState extends State<AdminPage> {
                     children: [
                       CircleAvatar(
                         radius: 40,
-                        backgroundColor: AppTheme.primaryColor,
+                        backgroundColor: Color(0xFFD9D9D9),
                         backgroundImage: NetworkImage(imageUrl),
                       ),
                       Column(
@@ -170,25 +116,7 @@ class _AdminPageState extends State<AdminPage> {
                   child: Text("Create Admin"),
                 ),
                 const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      "Your Publication",
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    GestureDetector(
-                      onTap: () {},
-                      child: Text(
-                        "See all",
-                        style: TextStyle(color: AppTheme.primaryColor),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                ...publications.map(buildModuleCard),
-                const SizedBox(height: 16),
+
                 // kategori
                 Column(
                   children: [
@@ -207,7 +135,7 @@ class _AdminPageState extends State<AdminPage> {
                             Navigator.pushNamed(context, AppRoutes.kategori);
                           },
                           child: Text(
-                            "See all",
+                            "Tambah",
                             style: TextStyle(color: AppTheme.primaryColor),
                           ),
                         ),
@@ -217,7 +145,7 @@ class _AdminPageState extends State<AdminPage> {
                     Consumer<KategoriProvider>(
                       builder:
                           (context, kategori, child) =>
-                              KategoriList(provider: kategori, maxItems: 3),
+                              KategoriList(provider: kategori, maxItems: 5),
                     ),
                   ],
                 ),

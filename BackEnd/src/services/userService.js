@@ -57,7 +57,6 @@ const createUser = async (userData, isAdmin = false) => {
         throw new Error('Password is required');
     }
     const dataToSave = {
-        user_id: userData.user_id,
         username: userData.username,
         password: hashPassword,
         email: userData.email,
@@ -70,6 +69,23 @@ const createUser = async (userData, isAdmin = false) => {
     return user;
 }
 
+const updateUserById = async (userToUpdate, userId, userData) => {
+    if (userData.password){
+    userData.password = await argon2.hash(userData.password);
+}
+    if (userToUpdate !== userId) {
+        throw new Error('Unauthorized');
+    }
+    const dataToSave = {
+        username: userData.username,
+        password: userData.password,
+        email: userData.email,
+        foto_profil: userData.foto_profil,
+        updated_at: new Date(), 
+    }
+    const user = await userRepository.updateUserById(userId, dataToSave);
+    return user;
+}
 
 
 module.exports = {
@@ -78,4 +94,5 @@ module.exports = {
     getUserByEmail,
     getUserById,
     createUser,
+    updateUserById
 }

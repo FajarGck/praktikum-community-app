@@ -64,6 +64,28 @@ class KategoriProvider with ChangeNotifier {
     }
   }
 
+  Future<bool> updateKategori({
+    required String token,
+    required String id,
+    required String kategoriName,
+  }) async {
+    _isLoading = false;
+    _errorMessage = null;
+    _successMessage = null;
+    notifyListeners();
+    try {
+      await _service.updateKategori(token, id, kategoriName);
+      await fetchKategori(token);
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   Future<bool> deleteKategori({
     required String token,
     required String id,

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:tugas_akhir/models/auth_response.dart';
 import 'package:tugas_akhir/provider/author_provider.dart';
 import 'package:tugas_akhir/provider/kategori_provider.dart';
+import 'package:tugas_akhir/provider/modul_provider.dart';
 import 'package:tugas_akhir/service/auth_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -41,6 +42,31 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  Future<bool> updateUser({
+    required BuildContext context,
+    required int userId,
+    required Map<String, dynamic> data,
+  }) async {
+    _loading = true;
+    notifyListeners();
+    try {
+      final updateUser = await _service.updateUser(
+        token: _token.toString(),
+        id: userId,
+        data: data,
+      );
+      _authData = AuthResponse(token: _token!, user: updateUser);
+      _onLoginSuccess(context, _token!);
+      notifyListeners();
+      return true;
+    } catch (e) {
+      rethrow;
+    } finally {
+      _loading = false;
+      notifyListeners();
+    }
+  }
+
   Future<String?> init() async {
     _token = await _storage.read(key: 'jwt_token');
     notifyListeners();
@@ -51,6 +77,7 @@ class AuthProvider with ChangeNotifier {
     await Future.wait([
       context.read<AuthorProvider>().fetchAuthor(token),
       context.read<KategoriProvider>().fetchKategori(token),
+      context.read<ModulProvider>().fetchModul(token),
     ]);
   }
 

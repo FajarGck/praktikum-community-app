@@ -11,8 +11,12 @@ class ApiEndpoints {
   static String get login => '$baseUrl/auth/login';
   static String get register => '$baseUrl/auth/register';
   static String get createAdmin => '$baseUrl/users/admin';
+  static String get getAllModul => '$baseUrl/modul';
+  static String get createKomentar => '$baseUrl/komentar';
 
   // contoh endpoint GET single by id
   static String getKategoriById(int id) => '$baseUrl/kategori/$id';
   static String userById(int id) => '$baseUrl/users/$id';
+  static String getDetailModulById(int id) => '$baseUrl/modul/$id';
+  static String getCardModulByUserId(int id) => '$baseUrl/modul/card/$id';
 }

@@ -35,9 +35,6 @@ class _AuthorsPageState extends State<AuthorsPage> {
       case 3:
         Navigator.pushNamed(context, AppRoutes.profile);
         break;
-      case 4:
-        Navigator.pushNamed(context, AppRoutes.admin);
-        break;
     }
   }
 
@@ -64,14 +61,6 @@ class _AuthorsPageState extends State<AuthorsPage> {
                   label: 'Profile',
                 ),
               ];
-              if (auth.authData?.user.role == 'admin') {
-                navItems.add(
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.admin_panel_settings),
-                    label: 'Admin',
-                  ),
-                );
-              }
               return BottomNavigationBar(
                 currentIndex: _selectedIndex,
                 onTap: _onItemTapped,

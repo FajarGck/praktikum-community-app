@@ -95,6 +95,26 @@ const createAdminUser = async (req, res) => {
     } 
 }
 
+const updateUserById = async (req, res) => {
+    const userId = req.params.userId;
+    const { username, password, email } = req.body;
+    const userToUpdate = parseInt(req.user.user_id);
+    const fotoProfile = req.file ? `/public/images/users/${req.file.filename}` : '/public/images/users/profile.png';
+    
+    try {
+        const user = await userService.updateUserById(userToUpdate, parseInt(userId), {username, password, email, foto_profil: fotoProfile});
+        res.status(200).json({
+            code: 200,
+            message: 'User Updated',
+            data: filterUsersResponse(user)
+        })
+    } catch (error) {
+        res.status(400).json({
+            code: 400,
+            message: error.message
+        })
+    }
+}
 
 
 
@@ -103,5 +123,6 @@ module.exports = {
     getUserByEmail,
     getUserByUsername,
     createUser,
-    createAdminUser
+    createAdminUser,
+    updateUserById
 }

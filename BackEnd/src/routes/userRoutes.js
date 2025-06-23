@@ -8,6 +8,7 @@ router.get('/', verifyUser, userController.getAllUser);
 router.get('/email/:email', verifyUser, userController.getUserByEmail)
 router.get('/username/:username', verifyUser, userController.getUserByUsername);
 router.post('/admin', verifyUser, isAdmin, uploadUser, userController.createAdminUser);
+router.patch('/:userId', verifyUser, uploadUser, userController.updateUserById);
 
 
 module.exports = router;

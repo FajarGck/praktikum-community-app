@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tugas_akhir/ui/pages/auth/create_admin.dart';
 import 'package:tugas_akhir/ui/pages/authors/admin_page.dart';
 import 'package:tugas_akhir/ui/pages/kategori/kategori_page.dart';
-
+import 'package:tugas_akhir/ui/widgets/modul_detail.dart';
 // Import semua halaman yang akan digunakan
 import '../ui/pages/auth/login_page.dart';
 import '../ui/pages/auth/register_page.dart';
@@ -42,11 +42,16 @@ class AppRoutes {
     authors: (context) => const AuthorsPage(),
     kategori: (context) => const KategoriPage(),
     createAdmin: (context) => const CreateAdmin(),
+    listmodul: (context) => const ModuleListPage(),
+    editProfile: (context) => const EditProfilePage(),
+    detailModul: (context) {
+      final settings = ModalRoute.of(context)!.settings;
+      final modulId = settings.arguments as int;
+      return DetailModulPage(modulId: modulId);
+    },
     // createModul: (context) => const CreateModulPage(),
     // detailModul: (context) => const DetailModulPage(),
     // komentar: (context) => const KomentarPage(),
-    // editProfile: (context) => const EditProfilePage(),
     // search: (context) => const SearchPage(),
-    // listmodul: (context) => const ModuleListPage(),
   };
 }

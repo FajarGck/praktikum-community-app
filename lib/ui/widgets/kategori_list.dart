@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:tugas_akhir/models/kategori_model.dart';
 import 'package:tugas_akhir/provider/auth_provider.dart';
 import 'package:tugas_akhir/provider/kategori_provider.dart';
+import 'package:tugas_akhir/ui/widgets/standar_input.dart';
 
 class KategoriList extends StatelessWidget {
   const KategoriList({
@@ -70,10 +71,68 @@ class KategoriList extends StatelessWidget {
                                   padding: EdgeInsets.all(0),
                                 ),
                                 onPressed: () {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text("${kategori.kategoriId}"),
-                                    ),
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      TextEditingController _updateController =
+                                          TextEditingController();
+                                      return AlertDialog(
+                                        title: Text(
+                                          "Update data ${kategori.namaKategori}",
+                                        ),
+                                        content: StandarInput(
+                                          label:
+                                              kategori.namaKategori.toString(),
+                                          controller: _updateController,
+                                          hint: 'pemrogaman',
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            child: Text("cancel"),
+                                            onPressed:
+                                                () => Navigator.pop(context),
+                                          ),
+                                          SizedBox(
+                                            width: 100,
+                                            child: ElevatedButton(
+                                              onPressed: () {
+                                                if (_updateController
+                                                    .text
+                                                    .isNotEmpty) {
+                                                  provider.updateKategori(
+                                                    token: token,
+                                                    id:
+                                                        kategori.kategoriId
+                                                            .toString(),
+                                                    kategoriName:
+                                                        _updateController.text,
+                                                  );
+                                                }
+                                                if (context.mounted) {
+                                                  ScaffoldMessenger.of(
+                                                    context,
+                                                  ).showSnackBar(
+                                                    SnackBar(
+                                                      content: Text(
+                                                        "Kategori berhasil diubah.",
+                                                      ),
+                                                    ),
+                                                  );
+                                                  Navigator.pop(context);
+                                                }
+                                              },
+                                              child: Text(
+                                                "Update",
+
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    },
                                   );
                                 },
                                 child: Icon(Icons.edit, color: Colors.white),

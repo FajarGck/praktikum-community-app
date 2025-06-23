@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:tugas_akhir/provider/auth_provider.dart';
 import 'package:tugas_akhir/provider/author_provider.dart';
 import 'package:tugas_akhir/provider/kategori_provider.dart';
+import 'package:tugas_akhir/provider/modul_provider.dart';
 import 'package:tugas_akhir/ui/widgets/wrapper.dart';
 import 'config/theme.dart';
 import 'routes/app_routes.dart';
@@ -17,6 +18,7 @@ void main(List<String> args) async {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => AuthorProvider()),
         ChangeNotifierProvider(create: (_) => KategoriProvider()),
+        ChangeNotifierProvider(create: (_) => ModulProvider()),
       ],
       child: const Communityapp(),
     ),

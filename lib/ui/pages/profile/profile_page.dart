@@ -5,6 +5,7 @@ import 'package:tugas_akhir/config/api.dart';
 import 'package:tugas_akhir/provider/auth_provider.dart';
 import 'package:tugas_akhir/provider/author_provider.dart';
 import 'package:tugas_akhir/provider/kategori_provider.dart';
+import 'package:tugas_akhir/provider/modul_provider.dart';
 import 'package:tugas_akhir/ui/widgets/loading.dart';
 import '../../../config/theme.dart';
 import '../../../routes/app_routes.dart';
@@ -35,9 +36,6 @@ class _ProfilePageState extends State<ProfilePage> {
         Navigator.pushNamed(context, AppRoutes.authors);
         break;
       case 3:
-        break;
-      case 4:
-        Navigator.pushNamed(context, AppRoutes.admin);
         break;
     }
   }
@@ -116,45 +114,48 @@ class _ProfilePageState extends State<ProfilePage> {
             child: ListView(
               padding: const EdgeInsets.all(20),
               children: [
-                Center(
-                  child: Row(
-                    spacing: 12,
-                    children: [
-                      CircleAvatar(
-                        radius: 40,
-                        backgroundColor: AppTheme.primaryColor,
-                        backgroundImage: NetworkImage(imageUrl),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '${auth.authData?.user.username}',
-                            style: GoogleFonts.poppins(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
+                Column(
+                  children: [
+                    Row(
+                      spacing: 12,
+                      children: [
+                        CircleAvatar(
+                          radius: 40,
+                          backgroundColor: Color(0xFFD9D9D9),
+                          backgroundImage: NetworkImage(imageUrl),
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${auth.authData?.user.username}',
+                              style: GoogleFonts.poppins(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
                             ),
-                          ),
-                          Text(
-                            '${auth.authData?.user.email}',
-                            style: GoogleFonts.poppins(
-                              fontWeight: FontWeight.normal,
-                              fontSize: 12,
-                              fontStyle: FontStyle.italic,
+                            Text(
+                              '${auth.authData?.user.email}',
+                              style: GoogleFonts.poppins(
+                                fontWeight: FontWeight.normal,
+                                fontSize: 12,
+                                fontStyle: FontStyle.italic,
+                              ),
                             ),
-                          ),
-                          Text(
-                            '${auth.authData?.user.role}',
-                            style: GoogleFonts.poppins(
-                              fontWeight: FontWeight.normal,
-                              fontSize: 10,
-                              color: AppTheme.primaryColor,
+                            Text(
+                              '${auth.authData?.user.role}',
+                              style: GoogleFonts.poppins(
+                                fontWeight: FontWeight.normal,
+                                fontSize: 10,
+                                color: AppTheme.primaryColor,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                  ],
                 ),
                 const SizedBox(height: 24),
                 Row(
@@ -176,24 +177,21 @@ class _ProfilePageState extends State<ProfilePage> {
                 const SizedBox(height: 8),
                 ...publications.map(buildModuleCard),
                 const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      "Bookmark",
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    GestureDetector(
-                      onTap: () {},
-                      child: Text(
-                        "See all",
-                        style: TextStyle(color: AppTheme.primaryColor),
+                if (auth.authData?.user.role == 'admin')
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, AppRoutes.createAdmin);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey[300],
+                        foregroundColor: Colors.black,
+                        padding: EdgeInsets.symmetric(vertical: 14),
                       ),
+                      child: Text("Create Admin"),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                ...bookmarks.map(buildModuleCard),
+                  ),
                 const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () {
@@ -212,6 +210,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     final authProvider = context.read<AuthProvider>();
                     final authorProvider = context.read<AuthorProvider>();
                     final kategoriProvider = context.read<KategoriProvider>();
+                    final modulProvder = context.read<ModulProvider>();
                     Navigator.pushNamedAndRemoveUntil(
                       context,
                       AppRoutes.login,
@@ -221,6 +220,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       authProvider.logout();
                       authorProvider.clearAuthor();
                       kategoriProvider.clearKategori();
+                      modulProvder.clearModul();
                     });
                   },
                   style: OutlinedButton.styleFrom(
@@ -244,14 +244,6 @@ class _ProfilePageState extends State<ProfilePage> {
             BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Authors'),
             BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
           ];
-          if (auth.authData?.user.role == 'admin') {
-            navItems.add(
-              BottomNavigationBarItem(
-                icon: Icon(Icons.admin_panel_settings),
-                label: 'Admin',
-              ),
-            );
-          }
           return BottomNavigationBar(
             currentIndex: _selectedIndex,
             onTap: _onItemTapped,

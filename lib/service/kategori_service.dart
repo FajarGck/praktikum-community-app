@@ -46,6 +46,29 @@ class KategoriService {
     }
   }
 
+  Future<KategoriModel> updateKategori(
+    String? token,
+    String id,
+    String name,
+  ) async {
+    final uri = Uri.parse('${ApiEndpoints.kategori}/$id');
+    final response = await http.patch(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({'nama_kategori': name}),
+    );
+
+    final responseData = jsonDecode(response.body) as Map<String, dynamic>;
+    if (response.statusCode == 200) {
+      return KategoriModel.fromJson(responseData['data']);
+    } else {
+      throw Exception(responseData['message'] ?? 'Gagal Memuat Kategori');
+    }
+  }
+
   Future<String> deleteKategori(String? token, String id) async {
     final uri = Uri.parse('${ApiEndpoints.kategori}/$id');
     final response = await http.delete(
