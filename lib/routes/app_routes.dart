@@ -3,6 +3,8 @@ import 'package:tugas_akhir/ui/pages/auth/create_admin.dart';
 import 'package:tugas_akhir/ui/pages/authors/admin_page.dart';
 import 'package:tugas_akhir/ui/pages/kategori/kategori_page.dart';
 import 'package:tugas_akhir/ui/widgets/modul_detail.dart';
+import 'package:tugas_akhir/models/modul_model.dart';
+import 'package:tugas_akhir/ui/pages/modul/edit_modul_page.dart';
 // Import semua halaman yang akan digunakan
 import '../ui/pages/auth/login_page.dart';
 import '../ui/pages/auth/register_page.dart';
@@ -33,7 +35,7 @@ class AppRoutes {
   static const String kategori = '/kategori';
   static const String createAdmin = '/create-admin';
   static const String searchResult = '/search-result';
-
+  static const String editModul = '/edit-modul';
   //daftar root biar lebih terstruktur
   static final Map<String, WidgetBuilder> routes = {
     login: (context) => const LoginPage(),
@@ -54,6 +56,12 @@ class AppRoutes {
     searchResult: (context) {
       final query = ModalRoute.of(context)!.settings.arguments as String;
       return SearchResultPage(searchQuery: query);
+    },
+    createModul: (context) => const CreateModulPage(),
+    editModul: (context) {
+      // Kita akan mengirim seluruh objek modul sebagai argumen
+      final modul = ModalRoute.of(context)!.settings.arguments as ModulModel;
+      return EditModulPage(modul: modul);
     },
     // createModul: (context) => const CreateModulPage(),
     // detailModul: (context) => const DetailModulPage(),

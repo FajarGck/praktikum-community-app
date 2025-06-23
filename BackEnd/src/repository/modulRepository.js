@@ -130,12 +130,68 @@ const searchModulByJudul = async (searchTerm) => {
             }
         }
     });
+
 }
+
+const createModul = async (modulData, langkahData) => {
+    // Menggunakan transaksi untuk memastikan modul dan langkah-langkahnya berhasil dibuat bersamaan
+    return await prisma.$transaction(async (tx) => {
+        const newModul = await tx.modul.create({
+            data: {
+                ...modulData,
+                status: 'approved' // atau 'pending' jika butuh approval
+            }
+        });
+
+        // Tambahkan modul_id ke setiap langkah
+        const langkahWithModulId = langkahData.map(langkah => ({
+            ...langkah,
+            modul_id: newModul.modul_id
+        }));
+
+        await tx.langkah.createMany({
+            data: langkahWithModulId
+        });
+
+        return newModul;
+    });
+};
+
+
+const updateModul = async (modulId, modulData, langkahData) => {
+    return await prisma.$transaction(async (tx) => {
+        // 1. Update data utama modul
+        const updatedModul = await tx.modul.update({
+            where: { modul_id: modulId },
+            data: modulData
+        });
+
+        // 2. Hapus semua langkah lama yang terkait dengan modul ini
+        await tx.langkah.deleteMany({
+            where: { modul_id: modulId }
+        });
+
+        // 3. Buat kembali langkah-langkah dengan data yang baru
+        if (langkahData && langkahData.length > 0) {
+            const langkahWithModulId = langkahData.map(langkah => ({
+                ...langkah,
+                modul_id: modulId
+            }));
+            await tx.langkah.createMany({
+                data: langkahWithModulId
+            });
+        }
+
+        return updatedModul;
+    });
+};
 
 
 module.exports = {
     getAllModulCard,
     getDetailModulById,
     getModulCardById,
-    searchModulByJudul
+    searchModulByJudul,
+    createModul,
+    updateModul
 }
