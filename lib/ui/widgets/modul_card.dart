@@ -9,9 +9,7 @@ class ModulCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // final imageUrl = "${ApiEndpoints.baseUrl}${modul.thumbnailUrl}";
     final profileUrl = "${ApiEndpoints.baseUrl}${modul.penulis?.fotoProfil}";
-    // final judul = modul.judul
     return GestureDetector(
       onTap:
           () => Navigator.pushNamed(

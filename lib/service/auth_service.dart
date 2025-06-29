@@ -94,7 +94,7 @@ class AuthService {
 
     if (response.statusCode == 200 || response.statusCode == 201) {
       final data = jsonDecode(response.body) as Map<String, dynamic>;
-      print("✅ Profil berhasil dimuat: $data");
+      // print("✅ Profil berhasil dimuat: $data");
       return UsersModel.fromJson(data);
     } else {
       final responseData = jsonDecode(response.body);

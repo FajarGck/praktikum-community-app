@@ -35,6 +35,23 @@ const getModulCardById = async (req, res) => {
     }
 }
 
+const getModulCardByKategori = async (req, res) => {
+    const kategoriId = parseInt(req.params.kategoriId);
+    try {
+        const modul = await modulService.getModulCardByKategori(kategoriId);
+        res.status(200).json({
+            code: 200,
+            message: 'ok!',
+            data: modul
+        })
+    } catch (error) {
+        res.status(400).json({
+            code: 400,
+            message: error.message
+        })
+    }
+}
+
 const getDetailModulById = async (req, res) => {
     const modulId = parseInt(req.params.modulId);
     const modul = await modulService.getDetailModulById(modulId);
@@ -150,6 +167,7 @@ const updateModul = async (req, res) => {
 module.exports = {
     getAllModulCard,
     getModulCardById,
+    getModulCardByKategori,
     getDetailModulById,
     searchModul,
     createModul,

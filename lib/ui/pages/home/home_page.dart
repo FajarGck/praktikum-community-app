@@ -21,29 +21,25 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
 
-  // Controller untuk mengelola input teks dan fokus keyboard
   final _searchController = TextEditingController();
   final _searchFocusNode = FocusNode();
 
   @override
   void dispose() {
-    // Selalu dispose controller untuk menghindari memory leak
     _searchController.dispose();
     _searchFocusNode.dispose();
     super.dispose();
   }
 
-  // Fungsi untuk menjalankan pencarian dan navigasi
   void _performSearch(String query) {
     if (query.trim().isNotEmpty) {
-      _searchFocusNode.unfocus(); // Sembunyikan keyboard setelah search
+      _searchFocusNode.unfocus();
       final authProvider = context.read<AuthProvider>();
 
       context
           .read<ModulProvider>()
           .searchModul(token: authProvider.token!, query: query)
           .then((_) {
-            // Setelah data hasil pencarian siap di provider, baru navigasi
             Navigator.pushNamed(
               context,
               AppRoutes.searchResult,
@@ -107,8 +103,6 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               const SizedBox(height: 20),
-
-              // === BAGIAN SEARCH FIELD YANG SUDAH DIGABUNGKAN ===
               TextField(
                 controller: _searchController,
                 focusNode: _searchFocusNode,
@@ -127,18 +121,13 @@ class _HomePageState extends State<HomePage> {
                     borderRadius: BorderRadius.circular(16),
                     borderSide: BorderSide.none,
                   ),
-                  // Menambahkan tombol kirim untuk memicu search juga
                   suffixIcon: IconButton(
                     icon: const Icon(Icons.send),
                     onPressed: () => _performSearch(_searchController.text),
                   ),
                 ),
               ),
-
-              // ============================================
               const SizedBox(height: 24),
-
-              // Kategori Modul (tidak berubah)
               Column(
                 children: [
                   Row(
@@ -163,12 +152,11 @@ class _HomePageState extends State<HomePage> {
                     ],
                   ),
                   const SizedBox(height: 12),
-                  KategoriList(provider: kategori, maxItems: 3),
+                  KategoriList(provider: kategori, maxItems: 4),
                 ],
               ),
               const SizedBox(height: 32),
 
-              // Post Terbaru (tidak berubah)
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -197,7 +185,7 @@ class _HomePageState extends State<HomePage> {
               ),
               const SizedBox(height: 32),
 
-              // Authors (tidak berubah)
+              // Authors
               Column(
                 children: [
                   Row(
@@ -240,14 +228,6 @@ class _HomePageState extends State<HomePage> {
             BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Authors'),
             BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
           ];
-          if (auth.authData?.user.role == 'admin') {
-            navItems.add(
-              BottomNavigationBarItem(
-                icon: Icon(Icons.admin_panel_settings),
-                label: 'Admin',
-              ),
-            );
-          }
           return BottomNavigationBar(
             currentIndex: _selectedIndex,
             onTap: _onItemTapped,

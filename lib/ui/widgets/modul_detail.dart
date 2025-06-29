@@ -20,7 +20,6 @@ class _DetailModulPageState extends State<DetailModulPage> {
   @override
   void initState() {
     super.initState();
-    // Mengambil data detail modul saat halaman pertama kali dibuka
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       Provider.of<ModulProvider>(
@@ -38,30 +37,22 @@ class _DetailModulPageState extends State<DetailModulPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Ambil data user yang sedang login untuk perbandingan ID
     final auth = context.read<AuthProvider>();
     final loggedInUserId = auth.authData?.user.userId;
     final token = auth.token!;
 
     return Scaffold(
-      // === BAGIAN YANG DIUBAH ADA DI APPBAR INI ===
       appBar: AppBar(
         title: const Text("Detail Modul"),
         actions: [
-          // Consumer ini akan me-render ulang tombol Edit saat data modul sudah siap
           Consumer<ModulProvider>(
             builder: (context, provider, child) {
               final modul = provider.detailModul;
-
-              // Tampilkan tombol Edit HANYA jika:
-              // 1. Data modul sudah ter-load (modul != null)
-              // 2. ID user yang login SAMA DENGAN ID penulis modul
               if (modul != null && loggedInUserId == modul.penulis?.userId) {
                 return IconButton(
                   icon: const Icon(Icons.edit),
                   tooltip: 'Edit Modul',
                   onPressed: () {
-                    // Navigasi ke halaman Edit, kirim seluruh data modul sebagai argumen
                     Navigator.pushNamed(
                       context,
                       AppRoutes.editModul,
@@ -70,14 +61,12 @@ class _DetailModulPageState extends State<DetailModulPage> {
                   },
                 );
               }
-              // Jika kondisi tidak terpenuhi, jangan tampilkan apa-apa
               return const SizedBox.shrink();
             },
           ),
         ],
       ),
 
-      //==============================================
       body: Consumer<ModulProvider>(
         builder: (context, provider, child) {
           if (provider.isLoading && provider.detailModul == null) {

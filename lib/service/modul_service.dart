@@ -29,6 +29,52 @@ class ModulService {
     }
   }
 
+  Future<List<ModulModel>> listModulByUserId(String? token, int userId) async {
+    final uri = Uri.parse(ApiEndpoints.getCardModulByUserId(userId));
+    final response = await http.get(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    final responsedata = jsonDecode(response.body) as Map<String, dynamic>;
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = responsedata['data'];
+      List<ModulModel> modulList =
+          data.map((item) => ModulModel.fromJson(item)).toList();
+      return modulList;
+    } else {
+      throw Exception(responsedata['message'] ?? 'gagal');
+    }
+  }
+
+  Future<List<ModulModel>> listModulByKategoriId(
+    String? token,
+    int kategoriId,
+  ) async {
+    final uri = Uri.parse(ApiEndpoints.getCardModulByKategoriId(kategoriId));
+    final response = await http.get(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    final responseData = jsonDecode(response.body) as Map<String, dynamic>;
+    if (response.statusCode == 200) {
+      List<dynamic> data = responseData['data'];
+      List<ModulModel> modulList =
+          data.map((item) => ModulModel.fromJson(item)).toList();
+      return modulList;
+    } else {
+      throw Exception(responseData['message'] ?? 'gagal');
+    }
+  }
+
   Future<List<ModulModel>> listModulById(String? token, int userId) async {
     final uri = Uri.parse(ApiEndpoints.getCardModulByUserId(userId));
     final response = await http.get(

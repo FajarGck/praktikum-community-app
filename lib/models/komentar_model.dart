@@ -1,5 +1,3 @@
-// lib/models/komentar_model.dart
-
 import 'package:tugas_akhir/models/user_model.dart'; // Impor model user
 
 class KomentarModel {
@@ -32,11 +30,8 @@ class KomentarModel {
           json['created_at'] != null
               ? DateTime.parse(json['created_at'])
               : null,
-      // Parse data penulis jika ada
       penulis:
-          json['penulis'] != null
-              ? UsersModel.fromJson(json['penulis'])
-              : null, // <-- TAMBAHKAN INI
+          json['penulis'] != null ? UsersModel.fromJson(json['penulis']) : null,
     );
   }
 }

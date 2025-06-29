@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/widgets.dart';
 import 'package:tugas_akhir/models/modul_model.dart';
@@ -11,6 +12,8 @@ class ModulProvider with ChangeNotifier {
   bool _isLoading = false;
   bool _isKomentar = false;
   List<ModulModel> _modulList = [];
+  List<ModulModel> _modulListByUserId = [];
+  List<ModulModel> _modulListByKategoriId = [];
   ModulModel? _detailModul;
   String? _errorMessage;
   String? _successMessage;
@@ -18,6 +21,8 @@ class ModulProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   bool get isKomentar => _isKomentar;
   List<ModulModel> get modulList => _modulList;
+  List<ModulModel> get modulListByUserId => _modulListByUserId;
+  List<ModulModel> get modulListByKategoriId => _modulListByKategoriId;
   ModulModel? get detailModul => _detailModul;
   String? get errorMessage => _errorMessage;
   String? get successMessage => _successMessage;
@@ -34,7 +39,6 @@ class ModulProvider with ChangeNotifier {
       notifyListeners();
       return;
     }
-
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -51,15 +55,37 @@ class ModulProvider with ChangeNotifier {
   Future<void> fetchModulByUserId(String? token, int userId) async {
     if (token == null) {
       _errorMessage = "Token tidak valid";
+      scheduleMicrotask(notifyListeners);
+      return;
+    }
+    _isLoading = true;
+    _errorMessage = null;
+    scheduleMicrotask(notifyListeners);
+    try {
+      _modulListByUserId = await _service.listModulByUserId(token, userId);
+    } catch (e) {
+      _errorMessage = e.toString();
+    } finally {
+      _isLoading = false;
+      scheduleMicrotask(notifyListeners);
+    }
+  }
+
+  Future<void> fetchModulByKategoriId(String? token, int kategoriId) async {
+    if (token == null) {
+      _errorMessage = "Token tidak valid";
       notifyListeners();
       return;
     }
-
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
+
     try {
-      _modulList = await _service.listModulById(token, userId);
+      _modulListByKategoriId = await _service.listModulByKategoriId(
+        token,
+        kategoriId,
+      );
     } catch (e) {
       _errorMessage = e.toString();
     } finally {
@@ -143,6 +169,10 @@ class ModulProvider with ChangeNotifier {
 
   Future<void> clearModul() async {
     _modulList = [];
+    _modulListByUserId = [];
+    _modulListByKategoriId = [];
+    _searchResultList = [];
+    _detailModul = null;
     _errorMessage = null;
     _successMessage = null;
     _isLoading = false;
