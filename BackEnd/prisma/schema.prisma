@@ -46,7 +46,6 @@ model langkah {
   modul_id          Int
   urutan            Int
   deskripsi_langkah String  @db.Text
-  foto_langkah      String? @db.VarChar(255)
   modul             modul   @relation(fields: [modul_id], references: [modul_id], onDelete: Cascade, map: "fk_langkah_modul")
 
   @@index([modul_id, urutan], map: "idx_langkah_modul_urutan")

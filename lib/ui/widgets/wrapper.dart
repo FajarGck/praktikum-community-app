@@ -27,9 +27,9 @@ class _WrapperState extends State<Wrapper> {
     }
 
     if (auth.isLoggedIn) {
-      return const HomePage();
+      return HomePage();
     } else {
-      return const LoginPage();
+      return LoginPage();
     }
   }
 }

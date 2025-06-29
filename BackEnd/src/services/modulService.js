@@ -1,3 +1,4 @@
+const { modul } = require('../config/db');
 const modulRepository = require('../repository/modulRepository');
 
 const getAllModulCard = async () => {
@@ -10,6 +11,13 @@ const getModulCardById = async (userId) => {
         throw new Error('modul id is required')
     }
     return await modulRepository.getModulCardById(userId);
+}
+
+const getModulCardByKategori = async (kategoriId) => {
+    if (!kategoriId) {
+        throw new Error('Kategeori Id is required')
+    }
+    return await modulRepository.getModulCardByKategori(kategoriId);
 }
 
 const getDetailModulById = async (modulId) => {
@@ -25,6 +33,8 @@ const getDetailModulById = async (modulId) => {
     return modul;
 }
 
+
+
 const searchModul = async (searchTerm) => {
    
     if (!searchTerm) {
@@ -32,7 +42,7 @@ const searchModul = async (searchTerm) => {
         return [];
     }
   
-    const modules = await searchModulByJudul(searchTerm);
+    const modules = await modulRepository.searchModulByJudul(searchTerm);
     return modules;
 }
 
@@ -61,6 +71,7 @@ const updateModul = async (modulId, loggedInUserId, modulData, langkahData) => {
 module.exports = {
     getAllModulCard,
     getModulCardById,
+    getModulCardByKategori,
     getDetailModulById,
     searchModul,
     createModul,

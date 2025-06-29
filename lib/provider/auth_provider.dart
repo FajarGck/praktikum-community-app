@@ -26,8 +26,6 @@ class AuthProvider with ChangeNotifier {
     required String email,
     required String password,
   }) async {
-    _loading = true;
-    notifyListeners();
     try {
       await _service.register(
         username: username,
@@ -36,9 +34,6 @@ class AuthProvider with ChangeNotifier {
       );
     } catch (e) {
       rethrow;
-    } finally {
-      _loading = false;
-      notifyListeners();
     }
   }
 
@@ -117,18 +112,18 @@ class AuthProvider with ChangeNotifier {
         _token = savedToken;
         _authData = AuthResponse(token: savedToken, user: data);
         await _onLoginSuccess(context, _token!);
-        print('✅ profile loaded: ${_authData!.user.username}');
+        // print('✅ profile loaded: ${_authData!.user.username}');
       } else {
         print("😓 token not found");
       }
     } catch (e) {
       _token = null;
       _authData = null;
-      print('❌ Auto-login gagal dengan error: $e');
+      // print('❌ Auto-login gagal dengan error: $e');
     } finally {
       _loading = false;
       notifyListeners();
-      print('◀ autoLogin end, isLoggedIn=${isLoggedIn}');
+      // print('◀ autoLogin end, isLoggedIn=${isLoggedIn}');
     }
   }
 }

@@ -61,7 +61,6 @@ class _CreateModulPageState extends State<CreateModulPage> {
   void _removeLangkah(int index) {
     if (_langkahControllers.length > 1) {
       setState(() {
-        // Penting untuk dispose controller sebelum menghapusnya dari list
         _langkahControllers[index].dispose();
         _langkahControllers.removeAt(index);
       });

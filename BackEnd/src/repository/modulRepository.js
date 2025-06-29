@@ -62,6 +62,37 @@ const getModulCardById = async (userId) => {
     })
 }
 
+const getModulCardByKategori = async (kategoriId) => {
+    return await prisma.modul.findMany({
+        where: {
+            kategori_id: kategoriId
+        },
+         orderBy: {
+            created_at: 'desc'
+        }, 
+        select: {
+            modul_id: true,
+            judul: true,
+            deskripsi: true,
+            thumbnail_url: true,
+            created_at: true,
+            penulis: {
+                select: {
+                    user_id: true,
+                    username: true,
+                    foto_profil: true
+                }
+            },
+            kategori: {
+                select: {
+                    kategori_id: true,
+                    nama_kategori: true
+                }
+            }
+        }
+    })
+} 
+
 const getDetailModulById = async (modulId) =>{
     return await prisma.modul.findUnique({
         where: {
@@ -102,7 +133,6 @@ const searchModulByJudul = async (searchTerm) => {
         where: {
             judul: {
                 contains: searchTerm,
-                mode: 'insensitive' 
             },
             status: 'approved' 
         },
@@ -134,16 +164,14 @@ const searchModulByJudul = async (searchTerm) => {
 }
 
 const createModul = async (modulData, langkahData) => {
-    // Menggunakan transaksi untuk memastikan modul dan langkah-langkahnya berhasil dibuat bersamaan
     return await prisma.$transaction(async (tx) => {
         const newModul = await tx.modul.create({
             data: {
                 ...modulData,
-                status: 'approved' // atau 'pending' jika butuh approval
+                status: 'approved' 
             }
         });
 
-        // Tambahkan modul_id ke setiap langkah
         const langkahWithModulId = langkahData.map(langkah => ({
             ...langkah,
             modul_id: newModul.modul_id
@@ -160,18 +188,15 @@ const createModul = async (modulData, langkahData) => {
 
 const updateModul = async (modulId, modulData, langkahData) => {
     return await prisma.$transaction(async (tx) => {
-        // 1. Update data utama modul
         const updatedModul = await tx.modul.update({
             where: { modul_id: modulId },
             data: modulData
         });
 
-        // 2. Hapus semua langkah lama yang terkait dengan modul ini
         await tx.langkah.deleteMany({
             where: { modul_id: modulId }
         });
 
-        // 3. Buat kembali langkah-langkah dengan data yang baru
         if (langkahData && langkahData.length > 0) {
             const langkahWithModulId = langkahData.map(langkah => ({
                 ...langkah,
@@ -190,6 +215,7 @@ const updateModul = async (modulId, modulData, langkahData) => {
 module.exports = {
     getAllModulCard,
     getDetailModulById,
+    getModulCardByKategori,
     getModulCardById,
     searchModulByJudul,
     createModul,

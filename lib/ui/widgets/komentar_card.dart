@@ -1,5 +1,3 @@
-// lib/ui/pages/modul/detail_modul_page.dart (Versi Sederhana)
-
 import 'package:flutter/material.dart';
 import 'package:tugas_akhir/config/api.dart';
 import 'package:tugas_akhir/models/komentar_model.dart';

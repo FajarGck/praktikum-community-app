@@ -120,6 +120,7 @@ class _LoginPageState extends State<LoginPage> {
                         onTap: () {
                           Navigator.pushNamed(context, AppRoutes.register);
                         },
+
                         child: Text(
                           "Sign Up",
                           style: TextStyle(

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:tugas_akhir/models/kategori_model.dart';
 import 'package:tugas_akhir/provider/auth_provider.dart';
 import 'package:tugas_akhir/provider/kategori_provider.dart';
+import 'package:tugas_akhir/routes/app_routes.dart';
 import 'package:tugas_akhir/ui/widgets/standar_input.dart';
 
 class KategoriList extends StatelessWidget {
@@ -40,6 +41,13 @@ class KategoriList extends StatelessWidget {
       children:
           listToDisplay.map((kategori) {
             return GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(
+                  context,
+                  AppRoutes.modulKategori,
+                  arguments: kategori.kategoriId,
+                );
+              },
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Stack(
@@ -139,21 +147,20 @@ class KategoriList extends StatelessWidget {
                               ),
                             ),
                             SizedBox(width: 4),
-                            SizedBox(
-                              height: 24,
-                              width: 24,
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  fixedSize: const Size(10, 10),
-                                  padding: EdgeInsets.all(0),
-                                ),
-                                onPressed: () {
-                                  // Tampilkan dialog konfirmasi
-                                  deleteKategori(context, kategori, token);
-                                },
-                                child: Icon(Icons.delete, color: Colors.red),
-                              ),
-                            ),
+                            // SizedBox(
+                            //   height: 24,
+                            //   width: 24,
+                            //   child: ElevatedButton(
+                            //     style: ElevatedButton.styleFrom(
+                            //       fixedSize: const Size(10, 10),
+                            //       padding: EdgeInsets.all(0),
+                            //     ),
+                            //     onPressed: () {
+                            //       deleteKategori(context, kategori, token);
+                            //     },
+                            //     child: Icon(Icons.delete, color: Colors.red),
+                            //   ),
+                            // ),
                           ],
                         ),
                       ),
