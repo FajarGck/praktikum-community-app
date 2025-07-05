@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:tugas_akhir/config/api.dart';
 import 'package:tugas_akhir/provider/auth_provider.dart';
 import 'package:tugas_akhir/provider/author_provider.dart';
+import 'package:tugas_akhir/provider/favorit_provider.dart';
 import 'package:tugas_akhir/provider/kategori_provider.dart';
 import 'package:tugas_akhir/provider/modul_provider.dart';
 import 'package:tugas_akhir/ui/widgets/loading.dart';
@@ -54,7 +55,9 @@ class _ProfilePageState extends State<ProfilePage> {
     if (currentUserId != null && currentUserId != _previousUserId) {
       _previousUserId = currentUserId;
       final modulProvider = context.read<ModulProvider>();
+      final favoritProvider = context.read<FavoritProvider>();
       modulProvider.fetchModulByUserId(auth.authData!.token, currentUserId);
+      favoritProvider.getFavorit(auth.token!);
     }
   }
 
@@ -144,6 +147,34 @@ class _ProfilePageState extends State<ProfilePage> {
                         );
                       },
                     ),
+                    const SizedBox(height: 24),
+                    const Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Favorite",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Consumer<FavoritProvider>(
+                      builder: (context, favorit, child) {
+                        if (favorit.isLoading) {
+                          return CircularProgressIndicator();
+                        }
+                        if (favorit.favoritList.isEmpty) {
+                          return SizedBox(
+                            height: 50,
+                            child: Text("Belum ada modul favorit."),
+                          );
+                        }
+                        return ModulList(
+                          listModul: favorit.favoritList,
+                          direction: Axis.horizontal,
+                        );
+                      },
+                    ),
                     const SizedBox(height: 16),
                     if (auth.authData?.user.role == 'admin')
                       SizedBox(
@@ -181,10 +212,12 @@ class _ProfilePageState extends State<ProfilePage> {
                         final kategoriProvider =
                             context.read<KategoriProvider>();
                         final modulProvder = context.read<ModulProvider>();
+                        final favoritProvider = context.read<FavoritProvider>();
                         authProvider.logout();
                         authorProvider.clearAuthor();
                         kategoriProvider.clearKategori();
                         modulProvder.clearModul();
+                        favoritProvider.clearFavorit();
 
                         Navigator.pushNamedAndRemoveUntil(
                           context,

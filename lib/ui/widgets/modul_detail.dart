@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tugas_akhir/config/api.dart';
 import 'package:tugas_akhir/provider/auth_provider.dart';
+import 'package:tugas_akhir/provider/favorit_provider.dart';
 import 'package:tugas_akhir/provider/modul_provider.dart';
 import 'package:tugas_akhir/routes/app_routes.dart';
 import 'package:tugas_akhir/ui/widgets/komentar_card.dart';
@@ -58,6 +59,26 @@ class _DetailModulPageState extends State<DetailModulPage> {
                       AppRoutes.editModul,
                       arguments: modul,
                     );
+                  },
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
+          Consumer<ModulProvider>(
+            builder: (context, provider, child) {
+              final modul = provider.detailModul;
+              if (modul != null) {
+                return IconButton(
+                  icon: Icon(
+                    modul.isFavorit ? Icons.favorite : Icons.favorite_border,
+                    color:
+                        modul.isFavorit ? Theme.of(context).primaryColor : null,
+                  ),
+                  tooltip: 'Tambahkan ke Favorit',
+                  onPressed: () async {
+                    final favoritProvider = context.read<FavoritProvider>();
+                    await provider.toggleDetailFavorit(token, favoritProvider);
                   },
                 );
               }

@@ -4,8 +4,9 @@ const path = require('path');
 const userRoutes = require('./routes/userRoutes');
 const authRoutes = require('./routes/authRoutes');
 const kategoriRoutes = require('./routes/kategoriRoutes');
-const modulRoutes = require('./routes/modulRoutes.js')
-const komentarRoutes = require('./routes/komentarRoutes.js')
+const modulRoutes = require('./routes/modulRoutes.js');
+const komentarRoutes = require('./routes/komentarRoutes.js');
+const favoritRoutes = require('./routes/favoriteRoutes.js');
 const dotenv = require("dotenv");
 const cors = require('cors');
 const loggRequestMiddleware = require("../src/middleware/logs")
@@ -27,6 +28,7 @@ app.use('/auth', authRoutes)
 app.use('/kategori', kategoriRoutes)
 app.use('/modul', modulRoutes)
 app.use('/komentar', komentarRoutes)
+app.use('/favorit', favoritRoutes)
 
 app.use((req, res) => {
     res.status(404).json({
