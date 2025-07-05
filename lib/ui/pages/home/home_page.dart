@@ -76,7 +76,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthProvider>();
+    // final auth = context.watch<AuthProvider>();
     final author = context.watch<AuthorProvider>();
     final kategori = context.watch<KategoriProvider>();
     final modul = context.watch<ModulProvider>();
@@ -129,6 +129,7 @@ class _HomePageState extends State<HomePage> {
               ),
               const SizedBox(height: 24),
               Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,

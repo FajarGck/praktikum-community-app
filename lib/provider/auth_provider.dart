@@ -114,7 +114,7 @@ class AuthProvider with ChangeNotifier {
         await _onLoginSuccess(context, _token!);
         // print('✅ profile loaded: ${_authData!.user.username}');
       } else {
-        print("😓 token not found");
+        // print("😓 token not found");
       }
     } catch (e) {
       _token = null;

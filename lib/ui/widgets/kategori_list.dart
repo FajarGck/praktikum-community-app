@@ -189,14 +189,13 @@ class KategoriList extends StatelessWidget {
             TextButton(
               child: const Text('Batal'),
               onPressed: () {
-                Navigator.of(dialogContext).pop(); // Tutup dialog
+                Navigator.of(dialogContext).pop();
               },
             ),
             TextButton(
               child: const Text('Hapus', style: TextStyle(color: Colors.red)),
               onPressed: () async {
-                Navigator.of(dialogContext).pop(); // Tutup dialog
-                // Logika hapus yang sudah kita perbaiki sebelumnya
+                Navigator.of(dialogContext).pop();
                 final isSuccess = await provider.deleteKategori(
                   id: kategori.kategoriId!.toString(),
                   token: token,

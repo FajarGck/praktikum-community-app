@@ -46,7 +46,7 @@ class AuthService {
     if (response.statusCode == 200 || response.statusCode == 201) {
       final data = responseData['data'];
       if (data == null) {
-        return AuthResponse.fromJson(responseData['message']);
+        throw responseData['message'];
       }
 
       return AuthResponse.fromJson(data as Map<String, dynamic>);

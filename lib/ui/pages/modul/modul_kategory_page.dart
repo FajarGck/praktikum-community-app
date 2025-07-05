@@ -15,14 +15,14 @@ class ModulKategoriPage extends StatefulWidget {
 
 class _ModulKategoriPageState extends State<ModulKategoriPage> {
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      Provider.of<ModulProvider>(
-        context,
-        listen: false,
-      ).fetchModulByKategoriId(authProvider.token, widget.kategoriId);
+      final authProvider = context.read<AuthProvider>();
+      context.read<ModulProvider>().fetchModulByKategoriId(
+        authProvider.token,
+        widget.kategoriId,
+      );
     });
   }
 
@@ -57,6 +57,5 @@ class _ModulKategoriPageState extends State<ModulKategoriPage> {
         },
       ),
     );
-    ;
   }
 }

@@ -1,7 +1,9 @@
 const userService = require('../services/userService');
 const jwt = require('jsonwebtoken')
+const fs = require('fs');
+const path = require('path');
 const TOKEN_SECRET = process.env.TOKEN_SECRET;
-
+const publicKey = fs.readFileSync(path.join(__dirname, '..', '..', 'public.key'), 'utf8');
 
 const verifyUser = async (req, res, next) => {
     const authHeader = req.headers['authorization'];
@@ -14,7 +16,7 @@ const verifyUser = async (req, res, next) => {
     }
 
     try {
-        const decodedPayload = jwt.verify(token, TOKEN_SECRET, { algorithms: ['HS256'] })
+        const decodedPayload = jwt.verify(token, publicKey, { algorithms: ['RS256'] })
         if (!decodedPayload) {
             return res.status(403).json({
                 code: 403,
@@ -43,7 +45,7 @@ const verifyUser = async (req, res, next) => {
 }
 
 const isAdmin = (req, res, next) => {
-    console.log(req.user);
+    // console.log(req.user);
     if (!req.user || req.user.role !== 'admin') {
         return res.status(403).json({
             code: 403,

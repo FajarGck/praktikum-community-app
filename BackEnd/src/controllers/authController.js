@@ -3,9 +3,12 @@ const userService = require('../services/userService');
 const argon2  = require('argon2');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
+const path = require('path');
 dotenv.config();
+const fs = require('fs');
 const TOKEN_SECRET = process.env.TOKEN_SECRET;
-
+const privateKey = fs.readFileSync(path.join(__dirname, '..', '..', 'private.key'), 'utf8');
+const publicKey = fs.readFileSync(path.join(__dirname, '..', '..', 'public.key'), 'utf8');
 
 const login = async (req, res) => {
     const { username, password } = req.body;
@@ -38,8 +41,11 @@ const login = async (req, res) => {
 
         const token = jwt.sign(
             payload,
-            TOKEN_SECRET,
-            { expiresIn: '10m' }
+            privateKey,
+            { 
+             expiresIn: '1h',
+             algorithm: 'RS256',
+            }
         )
         res.status(200).json({
             code: 200,

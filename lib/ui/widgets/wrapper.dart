@@ -6,6 +6,8 @@ import 'package:tugas_akhir/ui/pages/home/home_page.dart';
 import 'package:tugas_akhir/ui/widgets/loading.dart';
 
 class Wrapper extends StatefulWidget {
+  const Wrapper({super.key});
+
   @override
   State<Wrapper> createState() => _WrapperState();
 }

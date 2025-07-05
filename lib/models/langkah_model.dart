@@ -3,14 +3,12 @@ class LangkahModel {
   int? modulId;
   int? urutan;
   String? deskripsiLangkah;
-  Null? fotoLangkah;
 
   LangkahModel({
     this.langkahId,
     this.modulId,
     this.urutan,
     this.deskripsiLangkah,
-    this.fotoLangkah,
   });
 
   LangkahModel.fromJson(Map<String, dynamic> json) {
@@ -18,7 +16,6 @@ class LangkahModel {
     modulId = json['modul_id'];
     urutan = json['urutan'];
     deskripsiLangkah = json['deskripsi_langkah'];
-    fotoLangkah = json['foto_langkah'];
   }
 
   Map<String, dynamic> toJson() {
@@ -27,7 +24,6 @@ class LangkahModel {
     data['modul_id'] = modulId;
     data['urutan'] = urutan;
     data['deskripsi_langkah'] = deskripsiLangkah;
-    data['foto_langkah'] = fotoLangkah;
     return data;
   }
 }
