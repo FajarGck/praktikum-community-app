@@ -2,12 +2,15 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/widgets.dart';
 import 'package:tugas_akhir/models/modul_model.dart';
+import 'package:tugas_akhir/provider/favorit_provider.dart';
+import 'package:tugas_akhir/service/favorit_service.dart';
 import 'package:tugas_akhir/service/komentar_service.dart';
 import 'package:tugas_akhir/service/modul_service.dart';
 
 class ModulProvider with ChangeNotifier {
   final _service = ModulService();
   final _komentarService = KomentarService();
+  final _favoritService = FavoritService();
 
   bool _isLoading = false;
   bool _isKomentar = false;
@@ -106,6 +109,12 @@ class ModulProvider with ChangeNotifier {
     notifyListeners();
     try {
       _detailModul = await _service.getDetailModul(token, modulId);
+      if (_detailModul != null) {
+        _detailModul!.isFavorit = await _favoritService.checkIsFavorited(
+          token!,
+          modulId,
+        );
+      }
     } catch (e) {
       _errorMessage = e.toString();
     } finally {
@@ -241,6 +250,28 @@ class ModulProvider with ChangeNotifier {
       return false;
     } finally {
       _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> toggleDetailFavorit(
+    String token,
+    FavoritProvider favoritProvider,
+  ) async {
+    if (_detailModul == null) return;
+
+    final modulToUpdate = _detailModul!;
+    final isCurrentlyFavorited = modulToUpdate.isFavorit;
+
+    modulToUpdate.isFavorit = !isCurrentlyFavorited;
+    notifyListeners();
+
+    try {
+      await _favoritService.toggleFavorit(token, modulToUpdate.modulId!);
+      await favoritProvider.getFavorit(token);
+    } catch (e) {
+      modulToUpdate.isFavorit = isCurrentlyFavorited;
+      _errorMessage = "Gagal mengubah status favorit: ${e.toString()}";
       notifyListeners();
     }
   }

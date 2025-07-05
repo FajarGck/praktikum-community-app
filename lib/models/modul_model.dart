@@ -17,6 +17,7 @@ class ModulModel {
   KategoriModel? kategori;
   List<KomentarModel>? komentar;
   List<LangkahModel>? langkah;
+  bool isFavorit;
 
   ModulModel({
     this.modulId,
@@ -32,6 +33,7 @@ class ModulModel {
     this.kategori,
     this.komentar,
     this.langkah,
+    this.isFavorit = false,
   });
 
   factory ModulModel.fromJson(Map<String, dynamic> json) {
@@ -69,6 +71,7 @@ class ModulModel {
                 json['langkah'].map((x) => LangkahModel.fromJson(x)),
               )
               : [],
+      isFavorit: json['is_favorit'] ?? false,
     );
   }
 }

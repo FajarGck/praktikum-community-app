@@ -13,7 +13,12 @@ class ApiEndpoints {
   static String get createAdmin => '$baseUrl/users/admin';
   static String get getAllModul => '$baseUrl/modul';
   static String get createKomentar => '$baseUrl/komentar';
+  static String get favorit => '$baseUrl/favorit';
 
+  static String toggleFavorit(int modulId) =>
+      '$baseUrl/favorit/toggle/$modulId';
+  static String checkFavoritStatus(int modulId) =>
+      '$baseUrl/favorit/status/$modulId';
   static String getKategoriById(int id) => '$baseUrl/kategori/$id';
   static String userById(int id) => '$baseUrl/users/$id';
   static String getDetailModulById(int id) => '$baseUrl/modul/$id';

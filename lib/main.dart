@@ -3,6 +3,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:tugas_akhir/provider/auth_provider.dart';
 import 'package:tugas_akhir/provider/author_provider.dart';
+import 'package:tugas_akhir/provider/favorit_provider.dart';
 import 'package:tugas_akhir/provider/kategori_provider.dart';
 import 'package:tugas_akhir/provider/modul_provider.dart';
 import 'package:tugas_akhir/ui/widgets/wrapper.dart';
@@ -19,6 +20,7 @@ void main(List<String> args) async {
         ChangeNotifierProvider(create: (_) => AuthorProvider()),
         ChangeNotifierProvider(create: (_) => KategoriProvider()),
         ChangeNotifierProvider(create: (_) => ModulProvider()),
+        ChangeNotifierProvider(create: (_) => FavoritProvider()),
       ],
       child: const Communityapp(),
     ),
