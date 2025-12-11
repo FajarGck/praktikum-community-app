@@ -116,6 +116,38 @@ const updateUserById = async (req, res) => {
     }
 }
 
+const toggleUploadPermission = async (req, res) => {
+    const { id } = req.params; // ID User yang mau disanksi
+    try {
+        // Cek user target
+        const targetUser = await prisma.users.findUnique({ 
+            where: { user_id: parseInt(id) } 
+        });
+        
+        if (!targetUser) return res.status(404).json({ message: "User tidak ditemukan" });
+
+        // Balik statusnya (True -> False, False -> True)
+        const updatedUser = await prisma.users.update({
+            where: { user_id: parseInt(id) },
+            data: { can_upload: !targetUser.can_upload }
+        });
+
+        const statusMsg = updatedUser.can_upload ? "DIPULIHKAN (Bisa Upload)" : "DIBATASI (Tidak Bisa Upload)";
+        
+        res.status(200).json({
+            status: 200,
+            message: `Hak akses user ${statusMsg}.`,
+            data: {
+                user_id: updatedUser.user_id,
+                username: updatedUser.username,
+                can_upload: updatedUser.can_upload
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 
 
 module.exports = {
@@ -124,5 +156,6 @@ module.exports = {
     getUserByUsername,
     createUser,
     createAdminUser,
-    updateUserById
+    updateUserById,
+    toggleUploadPermission
 }

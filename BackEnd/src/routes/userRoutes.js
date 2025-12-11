@@ -9,6 +9,7 @@ router.get('/email/:email', verifyUser, userController.getUserByEmail)
 router.get('/username/:username', verifyUser, userController.getUserByUsername);
 router.post('/admin', verifyUser, isAdmin, uploadUser, userController.createAdminUser);
 router.patch('/:userId', verifyUser, uploadUser, userController.updateUserById);
+router.patch('/:id/sanksi', verifyUser, isAdmin, userController.toggleUploadPermission);
 
 
 module.exports = router;

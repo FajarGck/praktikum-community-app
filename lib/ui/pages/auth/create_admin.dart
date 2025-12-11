@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:tugas_akhir/config/theme.dart';
 import 'package:tugas_akhir/provider/auth_provider.dart';
@@ -46,7 +45,7 @@ class _CreateAdminState extends State<CreateAdmin> {
                     const SizedBox(height: 16),
                     Text(
                       "Create new Admin",
-                      style: GoogleFonts.poppins(
+                      style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: AppTheme.textColor,
@@ -122,7 +121,7 @@ class _CreateAdminState extends State<CreateAdmin> {
                             },
                             child: Text(
                               "Tambahkan",
-                              style: GoogleFonts.poppins(color: Colors.white),
+                              style: TextStyle(color: Colors.white),
                             ),
                           ),
                         );

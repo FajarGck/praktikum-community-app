@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:tugas_akhir/config/api.dart';
 import 'package:tugas_akhir/models/auth_response.dart';
 import 'package:tugas_akhir/provider/author_provider.dart';
 import 'package:tugas_akhir/provider/kategori_provider.dart';
 import 'package:tugas_akhir/provider/modul_provider.dart';
 import 'package:tugas_akhir/service/auth_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:http/http.dart' as http;
 
 class AuthProvider with ChangeNotifier {
   final _service = AuthService();
@@ -101,6 +103,34 @@ class AuthProvider with ChangeNotifier {
     await _storage.delete(key: 'jwt_token');
     notifyListeners();
   }
+
+
+  // Di dalam class AuthorProvider...
+
+Future<bool> toggleSanction(String token, int userId) async {
+  try {
+    // Panggil service (Pastikan kamu update service juga atau pakai http langsung di sini utk cepat)
+    // Untuk efisiensi, saya pakai http langsung di sini sebagai contoh cepat
+    // Idealnya masuk ke author_service.dart
+    final uri = Uri.parse('${ApiEndpoints.getAllAuthor}/$userId/sanksi');
+    final response = await http.patch(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      notifyListeners();
+      return true;
+    }
+    return false;
+  } catch (e) {
+    print("Error sanksi: $e");
+    return false;
+  }
+}
 
   Future<void> autoLogin({required BuildContext context}) async {
     _loading = true;

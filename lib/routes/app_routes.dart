@@ -6,6 +6,9 @@ import 'package:tugas_akhir/ui/pages/modul/modul_kategory_page.dart';
 import 'package:tugas_akhir/ui/widgets/modul_detail.dart';
 import 'package:tugas_akhir/models/modul_model.dart';
 import 'package:tugas_akhir/ui/pages/modul/edit_modul_page.dart';
+// [PENTING] Import halaman Laporan Admin
+import 'package:tugas_akhir/ui/pages/authors/laporan_admin_page.dart'; 
+
 import '../ui/pages/auth/login_page.dart';
 import '../ui/pages/auth/register_page.dart';
 import '../ui/pages/home/home_page.dart';
@@ -34,6 +37,11 @@ class AppRoutes {
   static const String createAdmin = '/create-admin';
   static const String searchResult = '/search-result';
   static const String editModul = '/edit-modul';
+  
+  // [BARU] Tambahkan konstanta nama rute ini
+  static const String laporanAdmin = '/laporan-admin';
+  
+
   static final Map<String, WidgetBuilder> routes = {
     login: (context) => const LoginPage(),
     register: (context) => const RegisterPage(),
@@ -45,6 +53,10 @@ class AppRoutes {
     createAdmin: (context) => const CreateAdmin(),
     listmodul: (context) => const ModuleListPage(),
     editProfile: (context) => const EditProfilePage(),
+    
+    // [BARU] Daftarkan rutenya di sini
+    laporanAdmin: (context) => const LaporanAdminPage(),
+
     detailModul: (context) {
       final settings = ModalRoute.of(context)!.settings;
       final modulId = settings.arguments as int;

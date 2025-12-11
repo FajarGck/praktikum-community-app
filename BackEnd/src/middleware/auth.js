@@ -35,13 +35,18 @@ const verifyUser = async (req, res, next) => {
 
       
         next();
-    } catch (error) {
-        if (error.name === 'TokenExpiredError' || error.name === 'JsonWebTokenError') {
-            return res.status(403).json({ code: 403, message: 'Invalid or expired token!' });
-          }
-          console.error(err);
-          return res.status(500).json({ code: 500, message: 'Internal Server Error' });
+    } catch (error) { // Perhatikan nama variabel ini adalah 'error'
+    // Log error lengkap biar ketahuan penyebabnya
+    console.log("⚠️ Auth Error:", error.name, error.message); 
+
+    if (error.name === 'TokenExpiredError' || error.name === 'JsonWebTokenError') {
+        return res.status(403).json({ code: 403, message: 'Invalid or expired token!' });
     }
+    
+    // PERBAIKAN: Ganti 'err' menjadi 'error'
+    console.error("🔥 Server Error:", error); 
+    return res.status(500).json({ code: 500, message: 'Internal Server Error' });
+}
 }
 
 const isAdmin = (req, res, next) => {

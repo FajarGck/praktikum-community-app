@@ -7,6 +7,7 @@ const path = require('path');
 dotenv.config();
 const fs = require('fs');
 const TOKEN_SECRET = process.env.TOKEN_SECRET;
+// Pastikan path key benar sesuai struktur folder kamu
 const privateKey = fs.readFileSync(path.join(__dirname, '..', '..', 'private.key'), 'utf8');
 const publicKey = fs.readFileSync(path.join(__dirname, '..', '..', 'public.key'), 'utf8');
 
@@ -28,15 +29,17 @@ const login = async (req, res) => {
                 message: 'Invalid password'
             });
         }
+
+        // [UPDATE DI SINI] Masukkan status sanksi ke dalam payload token
         const payload = {
             user_id : user.user_id,
             username: user.username,
             email: user.email,
             role: user.role,
+            can_upload: user.can_upload, // <--- PENTING: Tambahkan ini
             foto_profil: user.foto_profil,
             created_at: user.created_at,
             updated_at: user.updated_at,
-            
         };
 
         const token = jwt.sign(
@@ -47,17 +50,25 @@ const login = async (req, res) => {
              algorithm: 'RS256',
             }
         )
+
+        // [UPDATE DI SINI] Pastikan data user yang dikirim ke Flutter punya field can_upload
+        // Kita gabungkan hasil filter dengan field can_upload manual agar terbawa
+        const userResponse = {
+            ...filterUsersResponse(user),
+            can_upload: user.can_upload // <--- Pastikan ini terkirim
+        };
+
         res.status(200).json({
             code: 200,
             message: 'Login successful',
             data: {
                 token: token,
-                user: filterUsersResponse(user)
+                user: userResponse
             }
         });
     } catch (error) {
         res.status(500).json({
-            code: 404,
+            code: 500, // Perbaiki code status error jadi 500
             message: error.message
         });
     }
@@ -73,7 +84,6 @@ const logout = (req, res) => {
         message: 'Logout successfull!'
     })
 }
-
 
 module.exports = {
     login,

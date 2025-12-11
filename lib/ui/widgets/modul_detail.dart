@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tugas_akhir/config/api.dart';
+import 'package:tugas_akhir/config/theme.dart';
 import 'package:tugas_akhir/provider/auth_provider.dart';
 import 'package:tugas_akhir/provider/favorit_provider.dart';
 import 'package:tugas_akhir/provider/modul_provider.dart';
 import 'package:tugas_akhir/routes/app_routes.dart';
 import 'package:tugas_akhir/ui/widgets/komentar_card.dart';
+// [BARU] Import widget dialog laporan
+import 'package:tugas_akhir/ui/widgets/report_dialog.dart';
 
 class DetailModulPage extends StatefulWidget {
   final int modulId;
@@ -46,6 +49,7 @@ class _DetailModulPageState extends State<DetailModulPage> {
       appBar: AppBar(
         title: const Text("Detail Modul"),
         actions: [
+          // TOMBOL EDIT (Hanya muncul jika user adalah PENULIS)
           Consumer<ModulProvider>(
             builder: (context, provider, child) {
               final modul = provider.detailModul;
@@ -65,6 +69,8 @@ class _DetailModulPageState extends State<DetailModulPage> {
               return const SizedBox.shrink();
             },
           ),
+
+          // TOMBOL FAVORIT (Selalu muncul)
           Consumer<ModulProvider>(
             builder: (context, provider, child) {
               final modul = provider.detailModul;
@@ -79,6 +85,28 @@ class _DetailModulPageState extends State<DetailModulPage> {
                   onPressed: () async {
                     final favoritProvider = context.read<FavoritProvider>();
                     await provider.toggleDetailFavorit(token, favoritProvider);
+                  },
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
+
+          // [BARU] TOMBOL LAPORKAN (Hanya muncul jika user BUKAN PENULIS)
+          Consumer<ModulProvider>(
+            builder: (context, provider, child) {
+              final modul = provider.detailModul;
+              // Logika: Tampilkan jika data ada DAN user login != penulis
+              if (modul != null && loggedInUserId != modul.penulis?.userId) {
+                return IconButton(
+                  icon: const Icon(Icons.report_problem_rounded, color: AppTheme.primaryColor),
+                  tooltip: 'Laporkan Modul',
+                  onPressed: () {
+                    // Memunculkan Dialog Laporan
+                    showDialog(
+                      context: context,
+                      builder: (context) => ReportDialog(modulId: widget.modulId),
+                    );
                   },
                 );
               }
@@ -110,6 +138,13 @@ class _DetailModulPageState extends State<DetailModulPage> {
                       width: double.infinity,
                       height: 200,
                       fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          height: 200,
+                          color: Colors.grey[300],
+                          child: const Icon(Icons.broken_image, size: 50),
+                        );
+                      },
                     ),
                   ),
                 const SizedBox(height: 16),
@@ -125,9 +160,12 @@ class _DetailModulPageState extends State<DetailModulPage> {
                   children: [
                     CircleAvatar(
                       radius: 20,
-                      backgroundImage: NetworkImage(
-                        "${ApiEndpoints.baseUrl}${modul.penulis?.fotoProfil}",
-                      ),
+                      backgroundImage: (modul.penulis?.fotoProfil != null)
+                          ? NetworkImage("${ApiEndpoints.baseUrl}${modul.penulis?.fotoProfil}")
+                          : null,
+                      child: (modul.penulis?.fotoProfil == null) 
+                          ? const Icon(Icons.person) 
+                          : null,
                     ),
                     const SizedBox(width: 8),
                     Expanded(
@@ -140,7 +178,7 @@ class _DetailModulPageState extends State<DetailModulPage> {
                           ),
                           Text(
                             "Kategori: ${modul.kategori?.namaKategori ?? '-'}",
-                            style: TextStyle(fontSize: 12, color: Colors.grey),
+                            style: const TextStyle(fontSize: 12, color: Colors.grey),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -206,7 +244,7 @@ class _DetailModulPageState extends State<DetailModulPage> {
                     Expanded(
                       child: TextField(
                         controller: _komentarController,
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           hintText: "Tulis komentar...",
                           border: OutlineInputBorder(),
                           contentPadding: EdgeInsets.symmetric(
@@ -217,7 +255,14 @@ class _DetailModulPageState extends State<DetailModulPage> {
                       ),
                     ),
                     if (provider.isKomentar)
-                      const CircularProgressIndicator()
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 12.0),
+                        child: SizedBox(
+                          height: 24, 
+                          width: 24, 
+                          child: CircularProgressIndicator(strokeWidth: 2)
+                        ),
+                      )
                     else
                       IconButton(
                         onPressed: () async {
@@ -242,7 +287,7 @@ class _DetailModulPageState extends State<DetailModulPage> {
                       ),
                   ],
                 ),
-                SizedBox(height: 12),
+                const SizedBox(height: 12),
                 if (modul.komentar == null || modul.komentar!.isEmpty)
                   const Text("Belum ada Komentar")
                 else
@@ -252,7 +297,7 @@ class _DetailModulPageState extends State<DetailModulPage> {
                           return KomentarCard(komentar: komentar);
                         }).toList(),
                   ),
-                SizedBox(height: 32),
+                const SizedBox(height: 32),
               ],
             );
           }

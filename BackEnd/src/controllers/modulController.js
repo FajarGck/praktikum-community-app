@@ -91,6 +91,17 @@ const createModul = async (req, res) => {
     try {
         const penulis_id = req.user.user_id;
         const { judul, deskripsi, kategori_id, langkah } = req.body;
+        const checkUser = await prisma.users.findUnique({
+            where: { user_id: parseInt(user_id) },
+            select: { can_upload: true } // Cuma ambil field ini biar ringan
+        });
+
+        if (checkUser && checkUser.can_upload === false) {
+            return res.status(403).json({
+                status: 403,
+                message: "AKSES DIBATASI: Akun Anda sedang dalam sanksi tidak bisa upload modul."
+            });
+        }
 
         if (!req.file) {
             return res.status(400).json({ message: "Thumbnail modul wajib di-upload" });

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "./src/app.js",
   "scripts": {
-    "server": "node app.js"
+    "server": "node src/app.js"
   },
   "type": "commonjs",
   "author": "Kelompok PMO TI23",

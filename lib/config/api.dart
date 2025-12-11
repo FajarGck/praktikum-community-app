@@ -3,7 +3,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 class ApiEndpoints {
   static final String baseUrl = dotenv.env['API_BASE_URL']!;
 
-  // list endpoit
+  // list endpoint
   static String get getImage => '$baseUrl/';
   static String get getAllAuthor => '$baseUrl/users';
   static String get kategori => '$baseUrl/kategori';
@@ -14,6 +14,9 @@ class ApiEndpoints {
   static String get getAllModul => '$baseUrl/modul';
   static String get createKomentar => '$baseUrl/komentar';
   static String get favorit => '$baseUrl/favorit';
+  
+  // [TAMBAHAN BARU] Endpoint Laporan
+  static String get laporan => '$baseUrl/laporan'; 
 
   static String toggleFavorit(int modulId) =>
       '$baseUrl/favorit/toggle/$modulId';

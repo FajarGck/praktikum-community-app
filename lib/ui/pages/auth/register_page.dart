@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:tugas_akhir/provider/auth_provider.dart';
 import 'package:tugas_akhir/ui/widgets/input/secret_input.dart';
@@ -43,7 +42,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   SizedBox(height: 16),
                   Text(
                     "Welcome to\nThe Comunity 👋",
-                    style: GoogleFonts.poppins(
+                    style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: AppTheme.textColor,
@@ -52,7 +51,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   const SizedBox(height: 8),
                   Text(
                     "Register Your account",
-                    style: GoogleFonts.poppins(
+                    style: TextStyle(
                       fontSize: 12,
                       color: Colors.grey[600],
                     ),
@@ -102,7 +101,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       },
                       child: Text(
                         "Register",
-                        style: GoogleFonts.poppins(color: Colors.white),
+                        style: TextStyle(color: Colors.white),
                       ),
                     ),
                   ),

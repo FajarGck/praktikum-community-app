@@ -7,6 +7,7 @@ class UsersModel {
   String? createdAt;
   String? updatedAt;
   String? role;
+  bool? canUpload;
 
   UsersModel({
     this.userId,
@@ -17,6 +18,7 @@ class UsersModel {
     this.fotoProfil,
     this.createdAt,
     this.updatedAt,
+    this.canUpload=true,
   });
 
   UsersModel.fromJson(Map<String, dynamic> json) {
@@ -28,6 +30,7 @@ class UsersModel {
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
     role = json['role'];
+    canUpload = (json['can_upload'] == 1 || json['can_upload'] == true) ? true : false;
   }
 
   Map<String, dynamic> toJson() {
@@ -40,6 +43,7 @@ class UsersModel {
     data['created_at'] = createdAt;
     data['updated_at'] = updatedAt;
     data['role'] = role;
+    data['can_upload'] = canUpload;
     return data;
   }
 }

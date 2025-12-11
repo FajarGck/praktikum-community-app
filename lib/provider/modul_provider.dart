@@ -111,7 +111,7 @@ class ModulProvider with ChangeNotifier {
       _detailModul = await _service.getDetailModul(token, modulId);
       if (_detailModul != null) {
         _detailModul!.isFavorit = await _favoritService.checkIsFavorited(
-          token!,
+          token,
           modulId,
         );
       }

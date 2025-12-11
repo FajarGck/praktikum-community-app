@@ -7,6 +7,33 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// --- ENUM BARU ---
+enum kategori_laporan {
+  modul_bermasalah
+  tidak_etis
+  tidak_sesuai
+  lainnya
+}
+
+// --- MODEL BARU ---
+model laporan {
+  laporan_id Int              @id @default(autoincrement())
+  user_id    Int
+  modul_id   Int
+  kategori   kategori_laporan
+  deskripsi  String           @db.Text
+  created_at DateTime         @default(now()) @db.DateTime(0)
+
+  // Relasi
+  pelapor users @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "fk_laporan_user")
+  modul   modul @relation(fields: [modul_id], references: [modul_id], onDelete: Cascade, map: "fk_laporan_modul")
+
+  @@index([user_id], map: "idx_laporan_user")
+  @@index([modul_id], map: "idx_laporan_modul")
+}
+
+// --- MODEL LAMA (DENGAN UPDATE RELASI) ---
+
 model favorit {
   user_id    Int
   modul_id   Int
@@ -34,7 +61,7 @@ model komentar {
   modul          modul      @relation(fields: [modul_id], references: [modul_id], onDelete: Cascade, map: "fk_komentar_modul")
   komentar       komentar?  @relation("komentarTokomentar", fields: [parent_id], references: [komentar_id], map: "fk_komentar_parent")
   other_komentar komentar[] @relation("komentarTokomentar")
-  penulis          users      @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "fk_komentar_user")
+  penulis        users      @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "fk_komentar_user")
 
   @@index([modul_id], map: "idx_komentar_modul")
   @@index([parent_id], map: "idx_komentar_parent")
@@ -42,11 +69,11 @@ model komentar {
 }
 
 model langkah {
-  langkah_id        Int     @id @default(autoincrement())
+  langkah_id        Int    @id @default(autoincrement())
   modul_id          Int
   urutan            Int
-  deskripsi_langkah String  @db.Text
-  modul             modul   @relation(fields: [modul_id], references: [modul_id], onDelete: Cascade, map: "fk_langkah_modul")
+  deskripsi_langkah String @db.Text
+  modul             modul  @relation(fields: [modul_id], references: [modul_id], onDelete: Cascade, map: "fk_langkah_modul")
 
   @@index([modul_id, urutan], map: "idx_langkah_modul_urutan")
 }
@@ -64,13 +91,18 @@ model modul {
   favorit       favorit[]
   komentar      komentar[]
   langkah       langkah[]
+  
+  // Update: Tambahkan relasi ke laporan
+  laporan       laporan[]
+  
   kategori      kategori     @relation(fields: [kategori_id], references: [kategori_id], map: "fk_modul_kategori")
-  penulis         users        @relation(fields: [penulis_id], references: [user_id], map: "fk_modul_penulis")
+  penulis       users        @relation(fields: [penulis_id], references: [user_id], map: "fk_modul_penulis")
 
   @@index([kategori_id], map: "idx_modul_kategori")
   @@index([penulis_id], map: "idx_modul_penulis")
 }
 
+// Cari model users dan tambahkan field baru ini
 model users {
   user_id     Int        @id @default(autoincrement())
   username    String     @unique(map: "ux_users_username") @db.VarChar(50)
@@ -80,9 +112,12 @@ model users {
   created_at  DateTime   @default(now()) @db.DateTime(0)
   updated_at  DateTime   @default(now()) @db.DateTime(0)
   role        users_role @default(user)
+  can_upload  Boolean    @default(true) 
+
   favorit     favorit[]
   komentar    komentar[]
   modul       modul[]
+  laporan     laporan[]
 }
 
 enum users_role {

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:tugas_akhir/provider/auth_provider.dart';
 import 'package:tugas_akhir/provider/author_provider.dart';
@@ -19,7 +18,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 0;
+  int _selectedIndex = 0; // Default di Home
 
   final _searchController = TextEditingController();
   final _searchFocusNode = FocusNode();
@@ -40,69 +39,89 @@ class _HomePageState extends State<HomePage> {
           .read<ModulProvider>()
           .searchModul(token: authProvider.token!, query: query)
           .then((_) {
-            Navigator.pushNamed(
-              context,
-              AppRoutes.searchResult,
-              arguments: query,
-            );
-          });
+        Navigator.pushNamed(
+          context,
+          AppRoutes.searchResult,
+          arguments: query,
+        );
+      });
     }
   }
 
+  // Fungsi Navigasi Bawah
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
 
     switch (index) {
-      case 0:
+      case 0: // Home (Stay here)
         break;
-      case 1:
+      case 1: // Module
         Navigator.pushNamed(context, AppRoutes.listmodul);
         break;
-      case 2:
+      case 2: // Authors
         Navigator.pushNamed(context, AppRoutes.authors);
         break;
-      case 3:
+      case 3: // Profile
         Navigator.pushNamed(context, AppRoutes.profile);
         break;
-      case 4:
-        if (context.read<AuthProvider>().authData?.user.role == 'admin') {
-          Navigator.pushNamed(context, AppRoutes.admin);
-        }
+      case 4: // Admin (Hanya jika tombolnya ada)
+        Navigator.pushNamed(context, AppRoutes.admin);
         break;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // final auth = context.watch<AuthProvider>();
     final author = context.watch<AuthorProvider>();
     final kategori = context.watch<KategoriProvider>();
     final modul = context.watch<ModulProvider>();
 
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: AppTheme.primaryColor,
-        onPressed: () {
-          Navigator.pushNamed(context, AppRoutes.createModul);
+      // --- FAB (Tombol Tambah) dengan Logika Sanksi ---
+      floatingActionButton: Consumer<AuthProvider>(
+        builder: (context, auth, child) {
+          final user = auth.authData?.user;
+          // Default true jika null (anggap innocent)
+          final bool canUpload = user?.canUpload ?? true;
+
+          return FloatingActionButton(
+            backgroundColor: canUpload ? AppTheme.primaryColor : Colors.grey,
+            onPressed: () {
+              if (canUpload) {
+                Navigator.pushNamed(context, AppRoutes.createModul);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      "AKSES DIBATASI: Fitur upload Anda dinonaktifkan sementara.",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    backgroundColor: Colors.redAccent,
+                  ),
+                );
+              }
+            },
+            child: Icon(canUpload ? Icons.add : Icons.block, color: Colors.white),
+          );
         },
-        child: const Icon(Icons.add),
       ),
+
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: ListView(
             children: [
+              // Header
               const SizedBox(height: 8),
-              Text(
+              const Text(
                 "Home",
-                style: GoogleFonts.poppins(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 20),
+              
+              // Search Bar
               TextField(
                 controller: _searchController,
                 focusNode: _searchFocusNode,
@@ -113,42 +132,28 @@ class _HomePageState extends State<HomePage> {
                   hintText: 'Cari modul...',
                   filled: true,
                   fillColor: const Color(0xFFF5F5F5),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 14,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide.none,
-                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
                   suffixIcon: IconButton(
                     icon: const Icon(Icons.send),
                     onPressed: () => _performSearch(_searchController.text),
                   ),
                 ),
               ),
+              
               const SizedBox(height: 24),
+              
+              // Kategori
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        "Kategori Modul",
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      const Text("Kategori Modul", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                       GestureDetector(
-                        onTap: () {
-                          Navigator.pushNamed(context, AppRoutes.kategori);
-                        },
-                        child: Text(
-                          "See all",
-                          style: TextStyle(color: AppTheme.primaryColor),
-                        ),
+                        onTap: () => Navigator.pushNamed(context, AppRoutes.kategori),
+                        child: const Text("See all", style: TextStyle(color: AppTheme.primaryColor)),
                       ),
                     ],
                   ),
@@ -156,34 +161,23 @@ class _HomePageState extends State<HomePage> {
                   KategoriList(provider: kategori, maxItems: 4),
                 ],
               ),
+              
               const SizedBox(height: 32),
 
+              // Post Terbaru
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    "Post Terbaru",
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  const Text("Post Terbaru", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   GestureDetector(
-                    onTap:
-                        () => Navigator.pushNamed(context, AppRoutes.listmodul),
-                    child: Text(
-                      "See all",
-                      style: TextStyle(color: AppTheme.primaryColor),
-                    ),
+                    onTap: () => Navigator.pushNamed(context, AppRoutes.listmodul),
+                    child: const Text("See all", style: TextStyle(color: AppTheme.primaryColor)),
                   ),
                 ],
               ),
               const SizedBox(height: 12),
-              ModulList(
-                listModul: modul.modulList,
-                direction: Axis.horizontal,
-                maxItems: 5,
-              ),
+              ModulList(listModul: modul.modulList, direction: Axis.horizontal, maxItems: 5),
+              
               const SizedBox(height: 32),
 
               // Authors
@@ -192,21 +186,10 @@ class _HomePageState extends State<HomePage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        "Authors",
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      const Text("Authors", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                       GestureDetector(
-                        onTap: () {
-                          Navigator.pushNamed(context, AppRoutes.authors);
-                        },
-                        child: Text(
-                          "See all",
-                          style: TextStyle(color: AppTheme.primaryColor),
-                        ),
+                        onTap: () => Navigator.pushNamed(context, AppRoutes.authors),
+                        child: const Text("See all", style: TextStyle(color: AppTheme.primaryColor)),
                       ),
                     ],
                   ),
@@ -218,22 +201,39 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
+
+      // --- BOTTOM NAVIGATION BAR (YANG HARUS DI-UPDATE) ---
       bottomNavigationBar: Consumer<AuthProvider>(
         builder: (context, auth, child) {
-          final navItems = [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.menu_book),
-              label: 'Module',
-            ),
-            BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Authors'),
-            BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+          // 1. Definisikan item standar (4 biji)
+          final List<BottomNavigationBarItem> navItems = [
+            const BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+            const BottomNavigationBarItem(icon: Icon(Icons.menu_book), label: 'Module'),
+            const BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Authors'),
+            const BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
           ];
+
+          // 2. [LOGIKA PENTING] Cek apakah user adalah ADMIN
+          // Debug Print ini akan muncul di terminal untuk memastikan role user
+          final role = auth.authData?.user.role;
+          print("🔍 DEBUG: User Role saat ini = $role"); 
+
+          if (role == 'admin') {
+            // Jika admin, tambahkan tombol ke-5
+            navItems.add(
+              const BottomNavigationBarItem(
+                icon: Icon(Icons.admin_panel_settings),
+                label: 'Admin',
+              ),
+            );
+          }
+
           return BottomNavigationBar(
             currentIndex: _selectedIndex,
             onTap: _onItemTapped,
             selectedItemColor: AppTheme.primaryColor,
             unselectedItemColor: Colors.grey,
+            type: BottomNavigationBarType.fixed, // Agar layout tidak bergeser
             items: navItems,
           );
         },

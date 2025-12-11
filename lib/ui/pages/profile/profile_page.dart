@@ -1,7 +1,6 @@
 // lib/ui/pages/profile/profile_page.dart
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:tugas_akhir/config/api.dart';
 import 'package:tugas_akhir/provider/auth_provider.dart';
@@ -96,14 +95,14 @@ class _ProfilePageState extends State<ProfilePage> {
                             children: [
                               Text(
                                 '${auth.authData?.user.username}',
-                                style: GoogleFonts.poppins(
+                                style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16,
                                 ),
                               ),
                               Text(
                                 '${auth.authData?.user.email}',
-                                style: GoogleFonts.poppins(
+                                style: TextStyle(
                                   fontWeight: FontWeight.normal,
                                   fontSize: 12,
                                   fontStyle: FontStyle.italic,
@@ -111,7 +110,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               ),
                               Text(
                                 '${auth.authData?.user.role}',
-                                style: GoogleFonts.poppins(
+                                style: TextStyle(
                                   fontWeight: FontWeight.normal,
                                   fontSize: 10,
                                   color: AppTheme.primaryColor,
