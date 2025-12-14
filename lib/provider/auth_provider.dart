@@ -21,6 +21,16 @@ class AuthProvider with ChangeNotifier {
   bool get isLoading => _loading;
   bool get isLoggedIn => _token != null;
 
+  String requireToken() {
+    final t = _token;
+    if (t == null || t.isEmpty) {
+      throw StateError(
+        "Unauthorized: token is missing. User must login again.",
+      );
+    }
+    return t;
+  }
+
   Future<void> register({
     required String username,
     required String email,
@@ -42,11 +52,12 @@ class AuthProvider with ChangeNotifier {
     required int userId,
     required Map<String, dynamic> data,
   }) async {
+    final token = requireToken();
     _loading = true;
     notifyListeners();
     try {
       final updateUser = await _service.updateUser(
-        token: _token.toString(),
+        token: token,
         id: userId,
         data: data,
       );
@@ -72,7 +83,7 @@ class AuthProvider with ChangeNotifier {
     await Future.wait([
       context.read<AuthorProvider>().fetchAuthor(token),
       context.read<KategoriProvider>().fetchKategori(token),
-      context.read<ModulProvider>().fetchModul(token),
+      context.read<ModulProvider>().fetchModul(token: token),
     ]);
   }
 
@@ -111,19 +122,17 @@ class AuthProvider with ChangeNotifier {
         final data = await _service.getUserProfile(savedToken);
         _token = savedToken;
         _authData = AuthResponse(token: savedToken, user: data);
-        await _onLoginSuccess(context, _token!);
-        // print('✅ profile loaded: ${_authData!.user.username}');
+      }
+      if (context.mounted) {
+        await _onLoginSuccess(context, savedToken!);
       } else {
-        // print("😓 token not found");
+        _token = null;
       }
     } catch (e) {
-      _token = null;
-      _authData = null;
-      // print('❌ Auto-login gagal dengan error: $e');
+      await logout();
     } finally {
       _loading = false;
       notifyListeners();
-      // print('◀ autoLogin end, isLoggedIn=${isLoggedIn}');
     }
   }
 }

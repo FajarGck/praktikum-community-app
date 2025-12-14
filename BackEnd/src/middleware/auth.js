@@ -39,7 +39,7 @@ const verifyUser = async (req, res, next) => {
         if (error.name === 'TokenExpiredError' || error.name === 'JsonWebTokenError') {
             return res.status(403).json({ code: 403, message: 'Invalid or expired token!' });
           }
-          console.error(err);
+          console.error(error);
           return res.status(500).json({ code: 500, message: 'Internal Server Error' });
     }
 }

@@ -14,6 +14,21 @@ class KategoriPage extends StatefulWidget {
 
 class _KategoriPageState extends State<KategoriPage> {
   TextEditingController kategoriController = TextEditingController();
+  Future<void> refreshKategori() async {
+    try {
+      final token = context.read<AuthProvider>().token;
+      if (token != null) {
+        await context.read<KategoriProvider>().fetchKategori(token);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Gagal refresh: $e")));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
@@ -28,88 +43,94 @@ class _KategoriPageState extends State<KategoriPage> {
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
       ),
-      body: ListView(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              children: [
-                Column(
-                  children: [
-                    if (role == 'admin')
-                      Column(
-                        children: [
-                          StandarInput(
-                            label: "Kategori",
-                            controller: kategoriController,
-                            hint: "Kategori Baru",
-                          ),
-                          const SizedBox(height: 12),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: () async {
-                                if (kategoriController.text.isEmpty) {
-                                  return;
-                                }
-                                if (token == null) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                        "Sesi tidak valid, silakan login ulang.",
+      body: RefreshIndicator(
+        onRefresh: refreshKategori,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                children: [
+                  Column(
+                    children: [
+                      if (role == 'admin')
+                        Column(
+                          children: [
+                            StandarInput(
+                              label: "Kategori",
+                              controller: kategoriController,
+                              hint: "Kategori Baru",
+                            ),
+                            const SizedBox(height: 12),
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                onPressed: () async {
+                                  if (kategoriController.text.isEmpty) {
+                                    return;
+                                  }
+                                  if (token == null) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          "Sesi tidak valid, silakan login ulang.",
+                                        ),
                                       ),
-                                    ),
-                                  );
-                                  return;
-                                }
-                                try {
-                                  final bool isSuccess = await kategori
-                                      .createKategori(
-                                        token: token.toString(),
-                                        kategoriName: kategoriController.text,
-                                      );
-                                  if (context.mounted) {
-                                    if (isSuccess) {
+                                    );
+                                    return;
+                                  }
+                                  try {
+                                    final bool isSuccess = await kategori
+                                        .createKategori(
+                                          token: token.toString(),
+                                          kategoriName: kategoriController.text,
+                                        );
+                                    if (context.mounted) {
+                                      if (isSuccess) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              kategori.successMessage ??
+                                                  "Kategori berhasil ditambahkan.",
+                                            ),
+                                          ),
+                                        );
+                                        kategoriController.clear();
+                                      }
+                                    }
+                                  } catch (e) {
+                                    if (context.mounted) {
                                       ScaffoldMessenger.of(
                                         context,
                                       ).showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            kategori.successMessage ??
-                                                "Kategori berhasil ditambahkan.",
-                                          ),
-                                        ),
+                                        SnackBar(content: Text(e.toString())),
                                       );
-                                      kategoriController.clear();
                                     }
                                   }
-                                } catch (e) {
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text(e.toString())),
-                                    );
-                                  }
-                                }
-                              },
-                              child: const Text(
-                                "Tambah",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
+                                },
+                                child: const Text(
+                                  "Tambah",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                  ],
-                ),
-                SizedBox(height: 12),
-                KategoriList(provider: kategori, role: role.toString()),
-              ],
+                          ],
+                        ),
+                    ],
+                  ),
+                  SizedBox(height: 12),
+                  KategoriList(provider: kategori, role: role.toString()),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

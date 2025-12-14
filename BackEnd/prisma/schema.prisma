@@ -34,7 +34,7 @@ model komentar {
   modul          modul      @relation(fields: [modul_id], references: [modul_id], onDelete: Cascade, map: "fk_komentar_modul")
   komentar       komentar?  @relation("komentarTokomentar", fields: [parent_id], references: [komentar_id], map: "fk_komentar_parent")
   other_komentar komentar[] @relation("komentarTokomentar")
-  penulis          users      @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "fk_komentar_user")
+  penulis        users      @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "fk_komentar_user")
 
   @@index([modul_id], map: "idx_komentar_modul")
   @@index([parent_id], map: "idx_komentar_parent")
@@ -42,11 +42,11 @@ model komentar {
 }
 
 model langkah {
-  langkah_id        Int     @id @default(autoincrement())
+  langkah_id        Int    @id @default(autoincrement())
   modul_id          Int
   urutan            Int
-  deskripsi_langkah String  @db.Text
-  modul             modul   @relation(fields: [modul_id], references: [modul_id], onDelete: Cascade, map: "fk_langkah_modul")
+  deskripsi_langkah String @db.Text
+  modul             modul  @relation(fields: [modul_id], references: [modul_id], onDelete: Cascade, map: "fk_langkah_modul")
 
   @@index([modul_id, urutan], map: "idx_langkah_modul_urutan")
 }
@@ -65,7 +65,8 @@ model modul {
   komentar      komentar[]
   langkah       langkah[]
   kategori      kategori     @relation(fields: [kategori_id], references: [kategori_id], map: "fk_modul_kategori")
-  penulis         users        @relation(fields: [penulis_id], references: [user_id], map: "fk_modul_penulis")
+  penulis       users        @relation(fields: [penulis_id], references: [user_id], map: "fk_modul_penulis")
+  report        report[]
 
   @@index([kategori_id], map: "idx_modul_kategori")
   @@index([penulis_id], map: "idx_modul_penulis")
@@ -83,6 +84,7 @@ model users {
   favorit     favorit[]
   komentar    komentar[]
   modul       modul[]
+  report      report[]
 }
 
 enum users_role {
@@ -94,4 +96,34 @@ enum modul_status {
   pending
   reject
   approved
+}
+
+model report {
+  report_id  Int           @id @default(autoincrement())
+  modul_id   Int
+  user_id    Int
+  reason     report_reason
+  note       String?       @db.Text
+  status     report_status @default(pending)
+  created_at DateTime      @default(now()) @db.DateTime(0)
+
+  modul modul @relation(fields: [modul_id], references: [modul_id], onDelete: Cascade, map: "fk_report_modul")
+  users users @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "fk_report_user")
+
+  @@unique([user_id, modul_id], map: "ux_report_user_modul")
+  @@index([modul_id], map: "idx_report_modul")
+  @@index([status], map: "idx_report_status")
+}
+
+enum report_reason {
+  spam
+  not_academic
+  harassment
+  plagiarism
+  other
+}
+
+enum report_status {
+  pending
+  resolved
 }

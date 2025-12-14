@@ -68,6 +68,38 @@ const updateModul = async (modulId, loggedInUserId, modulData, langkahData) => {
     return await modulRepository.updateModul(modulId, modulData, langkahData);
 };
 
+const updateModulStatus = async (modulId, status) => {
+  if (!modulId) throw new Error("modul id is required");
+
+  const existing = await modulRepository.getDetailModulById(modulId);
+  if (!existing) throw new Error("Modul tidak ditemukan!");
+
+  return modulRepository.updateModulStatus(modulId, status);
+};
+
+
+const deleteModul = async (modulId, loggedInUserId) => {
+    if (!modulId) {
+        throw new Error("Modul ID is required");
+    } 
+    const existingModul = await modulRepository.getDetailModulById(modulId);
+    if (!existingModul) {
+        throw new Error("Modul tidak ditemukan!");
+    }
+    if (existingModul.penulis_id !== loggedInUserId) {
+        throw new Error("Akses ditolak: Anda bukan pemilik modul ini.");
+    }
+
+    return await modulRepository.deleteModul(modulId);
+}
+
+const adminDeleteModul = async (modulId) => {
+  const existing = await modulRepository.getDetailModulById(modulId);
+  if (!existing) throw new Error("Modul tidak ditemukan!");
+  return modulRepository.deleteModul(modulId);
+};
+
+
 module.exports = {
     getAllModulCard,
     getModulCardById,
@@ -75,5 +107,8 @@ module.exports = {
     getDetailModulById,
     searchModul,
     createModul,
-    updateModul
+    updateModul,
+    updateModulStatus,
+    deleteModul,
+    adminDeleteModul
 }

@@ -37,6 +37,21 @@ class _AuthorsPageState extends State<AuthorsPage> {
     }
   }
 
+  Future<void> _refreshAuthors() async {
+    final token = context.read<AuthProvider>().token;
+    if (token != null) {
+      try {
+        await context.read<AuthorProvider>().fetchAuthor(token);
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text("Gagal refresh: $e")));
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<AuthorProvider>(
@@ -76,27 +91,31 @@ class _AuthorsPageState extends State<AuthorsPage> {
             elevation: 0,
             iconTheme: const IconThemeData(color: Colors.black),
           ),
-          body: Padding(
-            padding: const EdgeInsets.all(20),
-            child: GridView.builder(
-              itemCount: author.authorList.length,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisSpacing: 18,
-                crossAxisSpacing: 18,
-                childAspectRatio: 1,
-              ),
+          body: RefreshIndicator(
+            onRefresh: _refreshAuthors,
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: GridView.builder(
+                physics: const AlwaysScrollableScrollPhysics(),
+                itemCount: author.authorList.length,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 18,
+                  crossAxisSpacing: 18,
+                  childAspectRatio: 1,
+                ),
 
-              itemBuilder: (context, index) {
-                return Container(
-                  padding: EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFEDEDED),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: AuthorsBox(author: author.authorList[index]),
-                );
-              },
+                itemBuilder: (context, index) {
+                  return Container(
+                    padding: EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEDEDED),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: AuthorsBox(author: author.authorList[index]),
+                  );
+                },
+              ),
             ),
           ),
         );

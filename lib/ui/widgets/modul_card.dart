@@ -28,7 +28,11 @@ class ModulCard extends StatelessWidget {
           scrollDirection: Axis.vertical,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+
             children: [
+              if (modul.status == 'reject')
+                const Text('Rejected', style: TextStyle(color: Colors.red)),
+
               Text(
                 modul.judul!,
                 style: const TextStyle(

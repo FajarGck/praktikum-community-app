@@ -14,7 +14,14 @@ class ApiEndpoints {
   static String get getAllModul => '$baseUrl/modul';
   static String get createKomentar => '$baseUrl/komentar';
   static String get favorit => '$baseUrl/favorit';
+  static String get report => '$baseUrl/report';
 
+  static String adminDeleteModul(int modulId) =>
+      '$baseUrl/modul/$modulId/admin';
+  static String resolveReport(int reportId) =>
+      '$baseUrl/report/$reportId/resolve';
+  static String updateModulStatus(int modulId) =>
+      '$baseUrl/modul/$modulId/status';
   static String toggleFavorit(int modulId) =>
       '$baseUrl/favorit/toggle/$modulId';
   static String checkFavoritStatus(int modulId) =>

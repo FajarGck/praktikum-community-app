@@ -31,6 +31,26 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
+  Future<void> _refreshData() async {
+    final token = context.read<AuthProvider>().token;
+
+    if (token != null) {
+      try {
+        await Future.wait([
+          context.read<ModulProvider>().fetchModul(token: token),
+          context.read<KategoriProvider>().fetchKategori(token),
+          context.read<AuthorProvider>().fetchAuthor(token),
+        ]);
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text("Gagal refresh: $e")));
+        }
+      }
+    }
+  }
+
   void _performSearch(String query) {
     if (query.trim().isNotEmpty) {
       _searchFocusNode.unfocus();
@@ -90,131 +110,136 @@ class _HomePageState extends State<HomePage> {
         child: const Icon(Icons.add),
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          child: ListView(
-            children: [
-              const SizedBox(height: 8),
-              Text(
-                "Home",
-                style: GoogleFonts.poppins(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: _searchController,
-                focusNode: _searchFocusNode,
-                textInputAction: TextInputAction.search,
-                onSubmitted: (value) => _performSearch(value),
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.search),
-                  hintText: 'Cari modul...',
-                  filled: true,
-                  fillColor: const Color(0xFFF5F5F5),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 14,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide.none,
-                  ),
-                  suffixIcon: IconButton(
-                    icon: const Icon(Icons.send),
-                    onPressed: () => _performSearch(_searchController.text),
+        child: RefreshIndicator(
+          onRefresh: _refreshData,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: [
+                const SizedBox(height: 8),
+                Text(
+                  "Home",
+                  style: GoogleFonts.poppins(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-              ),
-              const SizedBox(height: 24),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Kategori Modul",
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.pushNamed(context, AppRoutes.kategori);
-                        },
-                        child: Text(
-                          "See all",
-                          style: TextStyle(color: AppTheme.primaryColor),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  KategoriList(provider: kategori, maxItems: 4),
-                ],
-              ),
-              const SizedBox(height: 32),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Post Terbaru",
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                const SizedBox(height: 20),
+                TextField(
+                  controller: _searchController,
+                  focusNode: _searchFocusNode,
+                  textInputAction: TextInputAction.search,
+                  onSubmitted: (value) => _performSearch(value),
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.search),
+                    hintText: 'Cari modul...',
+                    filled: true,
+                    fillColor: const Color(0xFFF5F5F5),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide.none,
+                    ),
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.send),
+                      onPressed: () => _performSearch(_searchController.text),
                     ),
                   ),
-                  GestureDetector(
-                    onTap:
-                        () => Navigator.pushNamed(context, AppRoutes.listmodul),
-                    child: Text(
-                      "See all",
-                      style: TextStyle(color: AppTheme.primaryColor),
+                ),
+                const SizedBox(height: 24),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Kategori Modul",
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.pushNamed(context, AppRoutes.kategori);
+                          },
+                          child: Text(
+                            "See all",
+                            style: TextStyle(color: AppTheme.primaryColor),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              ModulList(
-                listModul: modul.modulList,
-                direction: Axis.horizontal,
-                maxItems: 5,
-              ),
-              const SizedBox(height: 32),
+                    const SizedBox(height: 12),
+                    KategoriList(provider: kategori, maxItems: 4),
+                  ],
+                ),
+                const SizedBox(height: 32),
 
-              // Authors
-              Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Authors",
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Post Terbaru",
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
                       ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.pushNamed(context, AppRoutes.authors);
-                        },
-                        child: Text(
-                          "See all",
-                          style: TextStyle(color: AppTheme.primaryColor),
-                        ),
+                    ),
+                    GestureDetector(
+                      onTap:
+                          () =>
+                              Navigator.pushNamed(context, AppRoutes.listmodul),
+                      child: Text(
+                        "See all",
+                        style: TextStyle(color: AppTheme.primaryColor),
                       ),
-                    ],
-                  ),
-                  authorList(author),
-                ],
-              ),
-              const SizedBox(height: 40),
-            ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                ModulList(
+                  listModul: modul.modulList,
+                  direction: Axis.horizontal,
+                  maxItems: 5,
+                ),
+                const SizedBox(height: 32),
+
+                // Authors
+                Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Authors",
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.pushNamed(context, AppRoutes.authors);
+                          },
+                          child: Text(
+                            "See all",
+                            style: TextStyle(color: AppTheme.primaryColor),
+                          ),
+                        ),
+                      ],
+                    ),
+                    authorList(author),
+                  ],
+                ),
+                const SizedBox(height: 40),
+              ],
+            ),
           ),
         ),
       ),

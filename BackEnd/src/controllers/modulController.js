@@ -164,6 +164,75 @@ const updateModul = async (req, res) => {
     }
 };
 
+const updateModulStatus = async (req, res) => {
+  try {
+    const modulId = parseInt(req.params.modulId, 10);
+    if (isNaN(modulId)) {
+      return res.status(400).json({ code: 400, message: "modulId tidak valid" });
+    }
+
+    const { status } = req.body;
+    if (!status) {
+      return res.status(400).json({ code: 400, message: "status is required" });
+    }
+
+    const allowed = ['pending', 'approved', 'reject'];
+    if (!allowed.includes(status)) {
+      return res.status(400).json({ code: 400, message: "status tidak valid" });
+    }
+
+    const data = await modulService.updateModulStatus(modulId, status);
+
+    res.status(200).json({
+      code: 200,
+      message: "Status modul berhasil diupdate",
+      data
+    });
+  } catch (error) {
+    res.status(400).json({ code: 400, message: error.message });
+  }
+};
+
+
+const deleteModul = async (req, res) => {
+    try {
+        const modulid = parseInt(req.params.modulId);
+        const loggedInUserId = req.user.user_id;
+        const deleted = await modulService.deleteModul(modulid, loggedInUserId);
+        res.status(200).json({
+            code: 200,
+            message: 'Modul berhasil dihapus!',
+            data: deleted
+        });
+    } catch (error) {
+        console.error("!!! ERROR DI delete Controller:", error);
+        res.status(400).json({
+            code: 400,
+            message: error.message
+        });
+    }
+}
+
+const adminDeleteModul = async (req, res) => {
+  try {
+    const modulId = parseInt(req.params.modulId, 10);
+    if (isNaN(modulId)) {
+      return res.status(400).json({ code: 400, message: "modulId tidak valid" });
+    }
+
+    const deleted = await modulService.adminDeleteModul(modulId);
+
+    return res.status(200).json({
+      code: 200,
+      message: "Modul berhasil dihapus oleh admin",
+      data: deleted
+    });
+  } catch (error) {
+    return res.status(400).json({ code: 400, message: error.message });
+  }
+};
+
+
 module.exports = {
     getAllModulCard,
     getModulCardById,
@@ -171,5 +240,8 @@ module.exports = {
     getDetailModulById,
     searchModul,
     createModul,
-    updateModul
+    updateModul,
+    updateModulStatus,
+    deleteModul,
+    adminDeleteModul
 }

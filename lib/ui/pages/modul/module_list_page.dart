@@ -36,6 +36,21 @@ class _ModuleListPageState extends State<ModuleListPage> {
     }
   }
 
+  Future<void> _refreshModul() async {
+    final token = context.read<AuthProvider>().token;
+    if (token != null) {
+      try {
+        await context.read<ModulProvider>().fetchModul(token: token);
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text("Gagal refresh: $e")));
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,17 +64,22 @@ class _ModuleListPageState extends State<ModuleListPage> {
       body: Consumer<ModulProvider>(
         builder: (context, modul, child) {
           if (modul.isLoading) return const Loading();
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            child: ListView.builder(
-              itemCount: modul.modulList.length,
-              itemBuilder: (context, index) {
-                final modulList = modul.modulList[index];
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 20),
-                  child: ModulCard(modul: modulList),
-                );
-              },
+          return RefreshIndicator(
+            onRefresh: _refreshModul,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+
+              child: ListView.builder(
+                physics: const AlwaysScrollableScrollPhysics(),
+                itemCount: modul.modulList.length,
+                itemBuilder: (context, index) {
+                  final modulList = modul.modulList[index];
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 20),
+                    child: ModulCard(modul: modulList),
+                  );
+                },
+              ),
             ),
           );
         },

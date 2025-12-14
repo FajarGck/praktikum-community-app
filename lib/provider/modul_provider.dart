@@ -36,12 +36,7 @@ class ModulProvider with ChangeNotifier {
   bool get isSearching => _isSearching;
   List<ModulModel> get searchResultList => _searchResultList;
 
-  Future<void> fetchModul(String? token) async {
-    if (token == null) {
-      _errorMessage = "Token tidak valid";
-      notifyListeners();
-      return;
-    }
+  Future<void> fetchModul({required String token}) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -55,12 +50,10 @@ class ModulProvider with ChangeNotifier {
     }
   }
 
-  Future<void> fetchModulByUserId(String? token, int userId) async {
-    if (token == null) {
-      _errorMessage = "Token tidak valid";
-      scheduleMicrotask(notifyListeners);
-      return;
-    }
+  Future<void> fetchModulByUserId({
+    required String token,
+    required int userId,
+  }) async {
     _isLoading = true;
     _errorMessage = null;
     scheduleMicrotask(notifyListeners);
@@ -74,12 +67,10 @@ class ModulProvider with ChangeNotifier {
     }
   }
 
-  Future<void> fetchModulByKategoriId(String? token, int kategoriId) async {
-    if (token == null) {
-      _errorMessage = "Token tidak valid";
-      notifyListeners();
-      return;
-    }
+  Future<void> fetchModulByKategoriId({
+    required String token,
+    required int kategoriId,
+  }) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -97,13 +88,10 @@ class ModulProvider with ChangeNotifier {
     }
   }
 
-  Future<void> fetchDetailModul(String? token, int modulId) async {
-    if (token == null) {
-      _errorMessage = "Token tidak valid";
-      notifyListeners();
-      return;
-    }
-
+  Future<void> fetchDetailModul({
+    required String token,
+    required int modulId,
+  }) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -208,7 +196,7 @@ class ModulProvider with ChangeNotifier {
         thumbnailImage: thumbnailImage,
         langkah: langkah,
       );
-      await fetchModul(token);
+      await fetchModul(token: token);
       return true;
     } catch (e) {
       _errorMessage = e.toString();
@@ -242,12 +230,31 @@ class ModulProvider with ChangeNotifier {
         langkah: langkah,
       );
       _successMessage = "Modul berhasil diperbarui";
-      await fetchModul(token);
-      await fetchDetailModul(token, modulId);
+      await fetchModul(token: token);
+      await fetchDetailModul(token: token, modulId: modulId);
       return true;
     } catch (e) {
       _errorMessage = e.toString();
       return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> deleteModul({
+    required String token,
+    required int modulId,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+    try {
+      await _service.deleteModul(token: token, modulId: modulId);
+      _successMessage = "Modul berhasil dihapus";
+      await fetchModul(token: token);
+    } catch (e) {
+      _errorMessage = e.toString();
     } finally {
       _isLoading = false;
       notifyListeners();

@@ -6,6 +6,7 @@ import 'package:tugas_akhir/provider/author_provider.dart';
 import 'package:tugas_akhir/provider/favorit_provider.dart';
 import 'package:tugas_akhir/provider/kategori_provider.dart';
 import 'package:tugas_akhir/provider/modul_provider.dart';
+import 'package:tugas_akhir/provider/report_provider.dart';
 import 'package:tugas_akhir/ui/widgets/wrapper.dart';
 import 'config/theme.dart';
 import 'routes/app_routes.dart';
@@ -21,6 +22,7 @@ void main(List<String> args) async {
         ChangeNotifierProvider(create: (_) => KategoriProvider()),
         ChangeNotifierProvider(create: (_) => ModulProvider()),
         ChangeNotifierProvider(create: (_) => FavoritProvider()),
+        ChangeNotifierProvider(create: (_) => ReportProvider()),
       ],
       child: const Communityapp(),
     ),

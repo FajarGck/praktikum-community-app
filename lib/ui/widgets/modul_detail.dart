@@ -4,6 +4,7 @@ import 'package:tugas_akhir/config/api.dart';
 import 'package:tugas_akhir/provider/auth_provider.dart';
 import 'package:tugas_akhir/provider/favorit_provider.dart';
 import 'package:tugas_akhir/provider/modul_provider.dart';
+import 'package:tugas_akhir/provider/report_provider.dart';
 import 'package:tugas_akhir/routes/app_routes.dart';
 import 'package:tugas_akhir/ui/widgets/komentar_card.dart';
 
@@ -23,10 +24,10 @@ class _DetailModulPageState extends State<DetailModulPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      Provider.of<ModulProvider>(
-        context,
-        listen: false,
-      ).fetchDetailModul(authProvider.token, widget.modulId);
+      Provider.of<ModulProvider>(context, listen: false).fetchDetailModul(
+        token: authProvider.requireToken(),
+        modulId: widget.modulId,
+      );
     });
   }
 
@@ -36,30 +37,90 @@ class _DetailModulPageState extends State<DetailModulPage> {
     super.dispose();
   }
 
+  Future<void> _refreshDetailModul() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    await Provider.of<ModulProvider>(context, listen: false).fetchDetailModul(
+      token: authProvider.requireToken(),
+      modulId: widget.modulId,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final auth = context.read<AuthProvider>();
     final loggedInUserId = auth.authData?.user.userId;
-    final token = auth.token!;
+    final token = auth.requireToken();
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Detail Modul"),
         actions: [
           Consumer<ModulProvider>(
             builder: (context, provider, child) {
               final modul = provider.detailModul;
               if (modul != null && loggedInUserId == modul.penulis?.userId) {
-                return IconButton(
-                  icon: const Icon(Icons.edit),
-                  tooltip: 'Edit Modul',
-                  onPressed: () {
-                    Navigator.pushNamed(
-                      context,
-                      AppRoutes.editModul,
-                      arguments: modul,
-                    );
-                  },
+                return Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit),
+                      tooltip: 'Edit Modul',
+                      onPressed: () {
+                        Navigator.pushNamed(
+                          context,
+                          AppRoutes.editModul,
+                          arguments: modul,
+                        );
+                      },
+                    ),
+                    IconButton(
+                      onPressed: () async {
+                        final modul = context.read<ModulProvider>().detailModul;
+                        if (modul == null) return;
+
+                        final confirm = await showDialog<bool>(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (dialogContext) {
+                            return AlertDialog(
+                              title: const Text('Hapus modul?'),
+                              content: Text(
+                                'Modul "${modul.judul ?? '-'}" akan dihapus permanen. '
+                                'Tindakan ini tidak bisa dibatalkan.',
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed:
+                                      () => Navigator.pop(dialogContext, false),
+                                  child: const Text('Batal'),
+                                ),
+                                TextButton(
+                                  onPressed:
+                                      () => Navigator.pop(dialogContext, true),
+                                  child: const Text('Hapus'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+
+                        if (confirm != true) return;
+
+                        await context.read<ModulProvider>().deleteModul(
+                          token: token,
+                          modulId: modul.modulId!,
+                        );
+
+                        if (!context.mounted) return;
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Modul berhasil dihapus'),
+                          ),
+                        );
+                      },
+                      icon: Icon(Icons.delete),
+                      tooltip: 'Hapus Modul',
+                    ),
+                  ],
                 );
               }
               return const SizedBox.shrink();
@@ -69,17 +130,121 @@ class _DetailModulPageState extends State<DetailModulPage> {
             builder: (context, provider, child) {
               final modul = provider.detailModul;
               if (modul != null) {
-                return IconButton(
-                  icon: Icon(
-                    modul.isFavorit ? Icons.favorite : Icons.favorite_border,
-                    color:
-                        modul.isFavorit ? Theme.of(context).primaryColor : null,
-                  ),
-                  tooltip: 'Tambahkan ke Favorit',
-                  onPressed: () async {
-                    final favoritProvider = context.read<FavoritProvider>();
-                    await provider.toggleDetailFavorit(token, favoritProvider);
-                  },
+                return Row(
+                  children: [
+                    IconButton(
+                      icon: Icon(
+                        modul.isFavorit
+                            ? Icons.favorite
+                            : Icons.favorite_border,
+                        color:
+                            modul.isFavorit
+                                ? Theme.of(context).primaryColor
+                                : null,
+                      ),
+                      tooltip: 'Tambahkan ke Favorit',
+                      onPressed: () async {
+                        final favoritProvider = context.read<FavoritProvider>();
+                        await provider.toggleDetailFavorit(
+                          token,
+                          favoritProvider,
+                        );
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.flag_outlined),
+                      tooltip: 'Laporkan konten',
+                      onPressed: () async {
+                        String reason = 'not_academic';
+                        final noteController = TextEditingController();
+
+                        final confirm = await showDialog<bool>(
+                          context: context,
+                          builder: (dialogContext) {
+                            return AlertDialog(
+                              title: const Text('Laporkan postingan'),
+                              content: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  DropdownButtonFormField<String>(
+                                    value: reason,
+                                    items: const [
+                                      DropdownMenuItem(
+                                        value: 'spam',
+                                        child: Text('Spam'),
+                                      ),
+                                      DropdownMenuItem(
+                                        value: 'not_academic',
+                                        child: Text('Tidak akademik'),
+                                      ),
+                                      DropdownMenuItem(
+                                        value: 'harassment',
+                                        child: Text('Harassment'),
+                                      ),
+                                      DropdownMenuItem(
+                                        value: 'plagiarism',
+                                        child: Text('Plagiarisme'),
+                                      ),
+                                      DropdownMenuItem(
+                                        value: 'other',
+                                        child: Text('Lainnya'),
+                                      ),
+                                    ],
+                                    onChanged:
+                                        (v) => reason = v ?? 'not_academic',
+                                    decoration: const InputDecoration(
+                                      labelText: 'Alasan',
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  TextField(
+                                    controller: noteController,
+                                    maxLines: 3,
+                                    decoration: const InputDecoration(
+                                      labelText: 'Catatan (opsional)',
+                                      border: OutlineInputBorder(),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed:
+                                      () => Navigator.pop(dialogContext, false),
+                                  child: const Text('Batal'),
+                                ),
+                                TextButton(
+                                  onPressed:
+                                      () => Navigator.pop(dialogContext, true),
+                                  child: const Text('Kirim'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+
+                        if (confirm != true) return;
+
+                        final reportProvider = context.read<ReportProvider>();
+
+                        final msg = await reportProvider.submitReport(
+                          token: token,
+                          modulId: widget.modulId,
+                          reason: reason,
+                          note:
+                              noteController.text.trim().isEmpty
+                                  ? null
+                                  : noteController.text.trim(),
+                        );
+
+                        if (!context.mounted) return;
+
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(SnackBar(content: Text(msg)));
+                      },
+                    ),
+                  ],
                 );
               }
               return const SizedBox.shrink();
@@ -99,161 +264,172 @@ class _DetailModulPageState extends State<DetailModulPage> {
 
           final modul = provider.detailModul;
           if (modul != null) {
-            return ListView(
-              padding: const EdgeInsets.all(16.0),
-              children: [
-                if (modul.thumbnailUrl != null)
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.network(
-                      "${ApiEndpoints.baseUrl}${modul.thumbnailUrl}",
-                      width: double.infinity,
-                      height: 200,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                const SizedBox(height: 16),
-                Text(
-                  modul.judul ?? 'Tanpa Judul',
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 20,
-                      backgroundImage: NetworkImage(
-                        "${ApiEndpoints.baseUrl}${modul.penulis?.fotoProfil}",
+            return RefreshIndicator(
+              onRefresh: _refreshDetailModul,
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(16.0),
+                children: [
+                  if (modul.thumbnailUrl != null)
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.network(
+                        "${ApiEndpoints.baseUrl}${modul.thumbnailUrl}",
+                        width: double.infinity,
+                        height: 200,
+                        fit: BoxFit.cover,
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            modul.penulis?.username ?? 'Anonim',
-                            style: const TextStyle(fontWeight: FontWeight.w500),
-                          ),
-                          Text(
-                            "Kategori: ${modul.kategori?.namaKategori ?? '-'}",
-                            style: TextStyle(fontSize: 12, color: Colors.grey),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
+                  const SizedBox(height: 16),
+                  Text(
+                    modul.judul ?? 'Tanpa Judul',
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
                     ),
-                  ],
-                ),
-                const Divider(height: 32),
-                const Text(
-                  "Deskripsi",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                Text(modul.deskripsi ?? 'Tidak ada deskripsi.'),
-                const SizedBox(height: 24),
-                const Text(
-                  "Langkah-langkah Project",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                if (modul.langkah == null || modul.langkah!.isEmpty)
-                  const Text("Tidak ada langkah-langkah yang tersedia.")
-                else
-                  Column(
-                    children:
-                        modul.langkah!.map((langkah) {
-                          return Card(
-                            margin: const EdgeInsets.only(bottom: 12),
-                            child: Padding(
-                              padding: const EdgeInsets.all(12.0),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "${langkah.urutan}.",
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(langkah.deskripsiLangkah ?? ''),
-                                  ),
-                                ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 20,
+                        backgroundImage: NetworkImage(
+                          "${ApiEndpoints.baseUrl}${modul.penulis?.fotoProfil}",
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              modul.penulis?.username ?? 'Anonim',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
-                          );
-                        }).toList(),
+                            Text(
+                              "Kategori: ${modul.kategori?.namaKategori ?? '-'}",
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                const SizedBox(height: 24),
-                Text(
-                  "Komentar (${modul.komentar?.length ?? 0})",
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                  const Divider(height: 32),
+                  const Text(
+                    "Deskripsi",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _komentarController,
-                        decoration: InputDecoration(
-                          hintText: "Tulis komentar...",
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
+                  const SizedBox(height: 8),
+                  Text(modul.deskripsi ?? 'Tidak ada deskripsi.'),
+                  const SizedBox(height: 24),
+                  const Text(
+                    "Langkah-langkah Project",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  if (modul.langkah == null || modul.langkah!.isEmpty)
+                    const Text("Tidak ada langkah-langkah yang tersedia.")
+                  else
+                    Column(
+                      children:
+                          modul.langkah!.map((langkah) {
+                            return Card(
+                              margin: const EdgeInsets.only(bottom: 12),
+                              child: Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "${langkah.urutan}.",
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        langkah.deskripsiLangkah ?? '',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                    ),
+                  const SizedBox(height: 24),
+                  Text(
+                    "Komentar (${modul.komentar?.length ?? 0})",
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _komentarController,
+                          decoration: InputDecoration(
+                            hintText: "Tulis komentar...",
+                            border: OutlineInputBorder(),
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    if (provider.isKomentar)
-                      const CircularProgressIndicator()
-                    else
-                      IconButton(
-                        onPressed: () async {
-                          if (_komentarController.text.isNotEmpty) {
-                            final success = await provider.createKomentar(
-                              token: token,
-                              modulId: widget.modulId,
-                              isiKomentar: _komentarController.text,
-                            );
-                            if (success) {
-                              _komentarController.clear();
-                            } else if (!success && context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text("Gagal membuat komentar"),
-                                ),
+                      if (provider.isKomentar)
+                        const CircularProgressIndicator()
+                      else
+                        IconButton(
+                          onPressed: () async {
+                            if (_komentarController.text.isNotEmpty) {
+                              final success = await provider.createKomentar(
+                                token: token,
+                                modulId: widget.modulId,
+                                isiKomentar: _komentarController.text,
                               );
+                              if (success) {
+                                _komentarController.clear();
+                              } else if (!success && context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text("Gagal membuat komentar"),
+                                  ),
+                                );
+                              }
                             }
-                          }
-                        },
-                        icon: const Icon(Icons.send),
-                      ),
-                  ],
-                ),
-                SizedBox(height: 12),
-                if (modul.komentar == null || modul.komentar!.isEmpty)
-                  const Text("Belum ada Komentar")
-                else
-                  Column(
-                    children:
-                        modul.komentar!.map((komentar) {
-                          return KomentarCard(komentar: komentar);
-                        }).toList(),
+                          },
+                          icon: const Icon(Icons.send),
+                        ),
+                    ],
                   ),
-                SizedBox(height: 32),
-              ],
+                  SizedBox(height: 12),
+                  if (modul.komentar == null || modul.komentar!.isEmpty)
+                    const Text("Belum ada Komentar")
+                  else
+                    Column(
+                      children:
+                          modul.komentar!.map((komentar) {
+                            return KomentarCard(komentar: komentar);
+                          }).toList(),
+                    ),
+                  SizedBox(height: 32),
+                ],
+              ),
             );
           }
           return const Center(child: Text("Modul tidak ditemukan."));

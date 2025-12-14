@@ -46,6 +46,31 @@ class _ProfilePageState extends State<ProfilePage> {
 
   int? _previousUserId;
 
+  Future<void> _refreshProfileData() async {
+    final auth = context.read<AuthProvider>();
+    final token = auth.token;
+    final currentUserId = auth.authData?.user.userId;
+
+    if (token != null && currentUserId != null) {
+      try {
+        await Future.wait([
+          context.read<ModulProvider>().fetchModulByUserId(
+            token: token,
+            userId: currentUserId,
+          ),
+          context.read<FavoritProvider>().getFavorit(token),
+          context.read<ModulProvider>().fetchModul(token: token),
+        ]);
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text("Gagal refresh: $e")));
+        }
+      }
+    }
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -56,7 +81,10 @@ class _ProfilePageState extends State<ProfilePage> {
       _previousUserId = currentUserId;
       final modulProvider = context.read<ModulProvider>();
       final favoritProvider = context.read<FavoritProvider>();
-      modulProvider.fetchModulByUserId(auth.authData!.token, currentUserId);
+      modulProvider.fetchModulByUserId(
+        token: auth.authData!.token,
+        userId: currentUserId,
+      );
       favoritProvider.getFavorit(auth.token!);
     }
   }
@@ -77,161 +105,196 @@ class _ProfilePageState extends State<ProfilePage> {
           final imageUrl =
               '${ApiEndpoints.baseUrl}${auth.authData?.user.fotoProfil}';
           return SafeArea(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 40,
-                          backgroundColor: const Color(0xFFD9D9D9),
-                          backgroundImage: NetworkImage(imageUrl),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '${auth.authData?.user.username}',
-                                style: GoogleFonts.poppins(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                ),
-                              ),
-                              Text(
-                                '${auth.authData?.user.email}',
-                                style: GoogleFonts.poppins(
-                                  fontWeight: FontWeight.normal,
-                                  fontSize: 12,
-                                  fontStyle: FontStyle.italic,
-                                ),
-                              ),
-                              Text(
-                                '${auth.authData?.user.role}',
-                                style: GoogleFonts.poppins(
-                                  fontWeight: FontWeight.normal,
-                                  fontSize: 10,
-                                  color: AppTheme.primaryColor,
-                                ),
-                              ),
-                            ],
+            child: RefreshIndicator(
+              onRefresh: _refreshProfileData,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 40,
+                            backgroundColor: const Color(0xFFD9D9D9),
+                            backgroundImage: NetworkImage(imageUrl),
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          "Your Publication",
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Consumer<ModulProvider>(
-                      builder: (context, modul, child) {
-                        if (modul.modulListByUserId.isEmpty) {
-                          return SizedBox(
-                            height: 50,
-                            child: Text("Belum ada Postingan"),
-                          );
-                        }
-                        return ModulList(
-                          listModul: modul.modulListByUserId,
-                          direction: Axis.horizontal,
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 24),
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "Favorite",
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Consumer<FavoritProvider>(
-                      builder: (context, favorit, child) {
-                        if (favorit.isLoading) {
-                          return CircularProgressIndicator();
-                        }
-                        if (favorit.favoritList.isEmpty) {
-                          return SizedBox(
-                            height: 50,
-                            child: Text("Belum ada modul favorit."),
-                          );
-                        }
-                        return ModulList(
-                          listModul: favorit.favoritList,
-                          direction: Axis.horizontal,
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    if (auth.authData?.user.role == 'admin')
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.pushNamed(context, AppRoutes.createAdmin);
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.grey[300],
-                            foregroundColor: Colors.black,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '${auth.authData?.user.username}',
+                                  style: GoogleFonts.poppins(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                Text(
+                                  '${auth.authData?.user.email}',
+                                  style: GoogleFonts.poppins(
+                                    fontWeight: FontWeight.normal,
+                                    fontSize: 12,
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                ),
+                                Text(
+                                  '${auth.authData?.user.role}',
+                                  style: GoogleFonts.poppins(
+                                    fontWeight: FontWeight.normal,
+                                    fontSize: 10,
+                                    color: AppTheme.primaryColor,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                          child: const Text("Create Admin"),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            "Your Publication",
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Consumer<ModulProvider>(
+                        builder: (context, modul, child) {
+                          if (modul.modulListByUserId.isEmpty) {
+                            return SizedBox(
+                              height: 50,
+                              child: Text("Belum ada Postingan"),
+                            );
+                          }
+                          return ModulList(
+                            listModul: modul.modulListByUserId,
+                            direction: Axis.horizontal,
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 24),
+                      const Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Favorite",
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Consumer<FavoritProvider>(
+                        builder: (context, favorit, child) {
+                          if (favorit.isLoading) {
+                            return CircularProgressIndicator();
+                          }
+                          if (favorit.favoritList.isEmpty) {
+                            return SizedBox(
+                              height: 50,
+                              child: Text("Belum ada modul favorit."),
+                            );
+                          }
+                          return ModulList(
+                            listModul: favorit.favoritList,
+                            direction: Axis.horizontal,
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      if (auth.authData?.user.role == 'admin')
+                        Column(
+                          children: [
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  Navigator.pushNamed(
+                                    context,
+                                    AppRoutes.createAdmin,
+                                  );
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.grey[300],
+                                  foregroundColor: Colors.black,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 14,
+                                  ),
+                                ),
+                                child: const Text("Create Admin"),
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  Navigator.pushNamed(
+                                    context,
+                                    AppRoutes.reports,
+                                  );
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.grey[300],
+                                  foregroundColor: Colors.black,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 14,
+                                  ),
+                                ),
+                                child: const Text("Laporan"),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.pushNamed(context, AppRoutes.editProfile);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey[300],
-                        foregroundColor: Colors.black,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        minimumSize: const Size(double.infinity, 36),
-                      ),
-                      child: const Text("Settings Account"),
-                    ),
-                    const SizedBox(height: 12),
-                    OutlinedButton(
-                      onPressed: () async {
-                        final authProvider = context.read<AuthProvider>();
-                        final authorProvider = context.read<AuthorProvider>();
-                        final kategoriProvider =
-                            context.read<KategoriProvider>();
-                        final modulProvder = context.read<ModulProvider>();
-                        final favoritProvider = context.read<FavoritProvider>();
-                        authProvider.logout();
-                        authorProvider.clearAuthor();
-                        kategoriProvider.clearKategori();
-                        modulProvder.clearModul();
-                        favoritProvider.clearFavorit();
 
-                        Navigator.pushNamedAndRemoveUntil(
-                          context,
-                          AppRoutes.login,
-                          (routes) => false,
-                        );
-                      },
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        minimumSize: const Size(double.infinity, 36),
+                      const SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, AppRoutes.editProfile);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.grey[300],
+                          foregroundColor: Colors.black,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          minimumSize: const Size(double.infinity, 36),
+                        ),
+                        child: const Text("Settings Account"),
                       ),
-                      child: const Text("Logout"),
-                    ),
-                  ],
+                      const SizedBox(height: 12),
+                      OutlinedButton(
+                        onPressed: () async {
+                          final authProvider = context.read<AuthProvider>();
+                          final authorProvider = context.read<AuthorProvider>();
+                          final kategoriProvider =
+                              context.read<KategoriProvider>();
+                          final modulProvder = context.read<ModulProvider>();
+                          final favoritProvider =
+                              context.read<FavoritProvider>();
+                          authProvider.logout();
+                          authorProvider.clearAuthor();
+                          kategoriProvider.clearKategori();
+                          modulProvder.clearModul();
+                          favoritProvider.clearFavorit();
+
+                          Navigator.pushNamedAndRemoveUntil(
+                            context,
+                            AppRoutes.login,
+                            (routes) => false,
+                          );
+                        },
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          minimumSize: const Size(double.infinity, 36),
+                        ),
+                        child: const Text("Logout"),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

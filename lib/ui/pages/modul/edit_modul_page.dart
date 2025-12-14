@@ -114,8 +114,7 @@ class _EditModulPageState extends State<EditModulPage> {
           judul: _judulController.text,
           deskripsi: _deskripsiController.text,
           kategoriId: _selectedKategoriId!,
-          thumbnailImage:
-              _newThumbnailImage, // Kirim gambar baru jika ada, jika tidak, kirim null
+          thumbnailImage: _newThumbnailImage,
           langkah: langkahList,
         );
 

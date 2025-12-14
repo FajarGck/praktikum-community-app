@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { verifyUser } = require('../middleware/auth');
+const { verifyUser, isAdmin } = require('../middleware/auth');
 const modulController = require('../controllers/modulController');
 const { uploadModul } = require('../middleware/upload');
 
@@ -12,5 +12,10 @@ router.get('/:modulId', verifyUser, modulController.getDetailModulById);
 
 router.post('/', verifyUser, uploadModul, modulController.createModul);
 router.patch('/:modulId', verifyUser, uploadModul, modulController.updateModul);
+router.delete('/:modulId', verifyUser, modulController.deleteModul)
+router.patch('/:modulId/status', verifyUser, isAdmin, modulController.updateModulStatus);
+router.delete('/:modulId/admin', verifyUser, isAdmin, modulController.adminDeleteModul);
+
+
 
 module.exports = router;

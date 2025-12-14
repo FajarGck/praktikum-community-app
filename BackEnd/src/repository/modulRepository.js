@@ -11,6 +11,7 @@ const getAllModulCard = async () => {
         select: {
             modul_id: true,
             judul: true,
+            status: true,
             deskripsi: true,
             thumbnail_url: true,
             created_at: true,
@@ -42,6 +43,7 @@ const getModulCardById = async (userId) => {
         select: {
             modul_id: true,
             judul: true,
+            status: true,
             deskripsi: true,
             thumbnail_url: true,
             created_at: true,
@@ -73,6 +75,7 @@ const getModulCardByKategori = async (kategoriId) => {
         select: {
             modul_id: true,
             judul: true,
+            status: true,
             deskripsi: true,
             thumbnail_url: true,
             created_at: true,
@@ -142,6 +145,7 @@ const searchModulByJudul = async (searchTerm) => {
         select: {
             modul_id: true,
             judul: true,
+            status: true,
             deskripsi: true,
             thumbnail_url: true,
             created_at: true,
@@ -211,6 +215,20 @@ const updateModul = async (modulId, modulData, langkahData) => {
     });
 };
 
+const updateModulStatus = async (modulId, status) => {
+  return prisma.modul.update({
+    where: { modul_id: modulId },
+    data: { status }
+  });
+};
+
+
+const deleteModul = async (modulId) => {
+    return await prisma.modul.delete({
+        where: { modul_id: modulId }    
+    })
+}
+
 
 module.exports = {
     getAllModulCard,
@@ -219,5 +237,7 @@ module.exports = {
     getModulCardById,
     searchModulByJudul,
     createModul,
-    updateModul
+    updateModul,
+    updateModulStatus,
+    deleteModul
 }

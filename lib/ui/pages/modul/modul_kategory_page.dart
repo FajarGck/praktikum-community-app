@@ -20,8 +20,8 @@ class _ModulKategoriPageState extends State<ModulKategoriPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final authProvider = context.read<AuthProvider>();
       context.read<ModulProvider>().fetchModulByKategoriId(
-        authProvider.token,
-        widget.kategoriId,
+        token: authProvider.requireToken(),
+        kategoriId: widget.kategoriId,
       );
     });
   }

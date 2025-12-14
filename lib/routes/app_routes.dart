@@ -3,6 +3,7 @@ import 'package:tugas_akhir/ui/pages/auth/create_admin.dart';
 import 'package:tugas_akhir/ui/pages/authors/admin_page.dart';
 import 'package:tugas_akhir/ui/pages/kategori/kategori_page.dart';
 import 'package:tugas_akhir/ui/pages/modul/modul_kategory_page.dart';
+import 'package:tugas_akhir/ui/pages/reports/report_page.dart';
 import 'package:tugas_akhir/ui/widgets/modul_detail.dart';
 import 'package:tugas_akhir/models/modul_model.dart';
 import 'package:tugas_akhir/ui/pages/modul/edit_modul_page.dart';
@@ -34,7 +35,9 @@ class AppRoutes {
   static const String createAdmin = '/create-admin';
   static const String searchResult = '/search-result';
   static const String editModul = '/edit-modul';
+  static const String reports = '/reports';
   static final Map<String, WidgetBuilder> routes = {
+    reports: (context) => const ReportsPage(),
     login: (context) => const LoginPage(),
     register: (context) => const RegisterPage(),
     home: (context) => const HomePage(),
