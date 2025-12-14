@@ -1,24 +1,14 @@
 const express = require('express')
 const app = express()
 const path = require('path');
-const userRoutes = require('./routes/userRoutes');
-const authRoutes = require('./routes/authRoutes');
-const kategoriRoutes = require('./routes/kategoriRoutes');
-const modulRoutes = require('./routes/modulRoutes.js');
 const komentarRoutes = require('./routes/komentarRoutes.js');
-const favoritRoutes = require('./routes/favoriteRoutes.js');
-const reportRoutes = require('./routes/reportRoutes.js');
 const dotenv = require("dotenv");
 const cors = require('cors');
 const loggRequestMiddleware = require("../src/middleware/logs")
 dotenv.config();
 const PORT = process.env.PORT || 7000;
+const serviceName = process.env.SERVICE_NAME || 'comment-service';
 
-
-app.use((req, res, next) => {
-  res.setHeader('X-Backend-Node', process.env.NODE_NAME || 'unknown-node');
-  next();
-});
 app.use(express.json());
 app.use(cors({
     origin: '*',
@@ -30,13 +20,9 @@ app.use(loggRequestMiddleware)
 app.get('/', (req, res) => {
     res.send('Server Berjalan')
 })
-app.use('/users', userRoutes)
-app.use('/auth', authRoutes)
-app.use('/kategori', kategoriRoutes)
-app.use('/modul', modulRoutes)
-app.use('/komentar', komentarRoutes)
-app.use('/favorit', favoritRoutes)
-app.use('/report', reportRoutes)
+app.get('/health', (req, res) => res.json({ ok: true, service: 'comment-service' }));
+app.use('/komentar', komentarRoutes);
+
 
 app.use((req, res) => {
     res.status(404).json({
@@ -45,6 +31,6 @@ app.use((req, res) => {
     })
 })
 app.listen(PORT, () => {
-    console.log(`Server 1 running in http://localhost:${PORT}`)
+    console.log(`${serviceName} running in http://localhost:${PORT}`)
 })
 

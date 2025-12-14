@@ -45,6 +45,6 @@ app.use((req, res) => {
     })
 })
 app.listen(PORT, () => {
-    console.log(`Server 1 running in http://localhost:${PORT}`)
+    console.log(`Server 2 running in http://localhost:${PORT}`)
 })
 
