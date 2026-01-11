@@ -6,5 +6,6 @@ const reportController = require('../controllers/reportController');
 router.post('/', verifyUser, reportController.createReport);
 router.get('/', verifyUser, isAdmin, reportController.getAllReports);
 router.patch('/:reportId/resolve', verifyUser, isAdmin, reportController.resolveReport);
+router.get('/:userId', verifyUser, reportController.getReportById);
 
 module.exports = router;

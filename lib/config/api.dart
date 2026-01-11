@@ -34,4 +34,5 @@ class ApiEndpoints {
       '$baseUrl/modul/kategori/$id';
   static String searchModul(String query) =>
       '$baseUrl/modul/search?judul=$query';
+  static String getReportByUserId(int userId) => '$baseUrl/report/$userId';
 }

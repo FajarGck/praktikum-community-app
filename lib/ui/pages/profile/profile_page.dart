@@ -1,5 +1,3 @@
-// lib/ui/pages/profile/profile_page.dart
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -9,8 +7,11 @@ import 'package:tugas_akhir/provider/author_provider.dart';
 import 'package:tugas_akhir/provider/favorit_provider.dart';
 import 'package:tugas_akhir/provider/kategori_provider.dart';
 import 'package:tugas_akhir/provider/modul_provider.dart';
+import 'package:tugas_akhir/provider/report_provider.dart';
 import 'package:tugas_akhir/ui/widgets/loading.dart';
 import 'package:tugas_akhir/ui/widgets/modul_list.dart';
+import 'package:tugas_akhir/ui/widgets/report_list.dart';
+
 import '../../../config/theme.dart';
 import '../../../routes/app_routes.dart';
 
@@ -55,17 +56,18 @@ class _ProfilePageState extends State<ProfilePage> {
       try {
         await Future.wait([
           context.read<ModulProvider>().fetchModulByUserId(
-            token: token,
-            userId: currentUserId,
-          ),
+                token: token,
+                userId: currentUserId,
+              ),
           context.read<FavoritProvider>().getFavorit(token),
           context.read<ModulProvider>().fetchModul(token: token),
+          context.read<ReportProvider>().fetchPendingReports(token: token),
         ]);
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text("Gagal refresh: $e")));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Gagal refresh: $e")),
+          );
         }
       }
     }
@@ -79,13 +81,17 @@ class _ProfilePageState extends State<ProfilePage> {
     final currentUserId = auth.authData?.user.userId;
     if (currentUserId != null && currentUserId != _previousUserId) {
       _previousUserId = currentUserId;
+
       final modulProvider = context.read<ModulProvider>();
       final favoritProvider = context.read<FavoritProvider>();
+      final reportProvider = context.read<ReportProvider>();
+
       modulProvider.fetchModulByUserId(
         token: auth.authData!.token,
         userId: currentUserId,
       );
       favoritProvider.getFavorit(auth.token!);
+      reportProvider.fetchPendingReports(token: auth.token!);
     }
   }
 
@@ -102,8 +108,10 @@ class _ProfilePageState extends State<ProfilePage> {
       body: Consumer<AuthProvider>(
         builder: (context, auth, child) {
           if (auth.isLoading) return const Loading();
+
           final imageUrl =
               '${ApiEndpoints.baseUrl}${auth.authData?.user.fotoProfil}';
+
           return SafeArea(
             child: RefreshIndicator(
               onRefresh: _refreshProfileData,
@@ -153,11 +161,13 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                         ],
                       ),
+
                       const SizedBox(height: 24),
+
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
+                        children: const [
+                          Text(
                             "Your Publication",
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
@@ -167,7 +177,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       Consumer<ModulProvider>(
                         builder: (context, modul, child) {
                           if (modul.modulListByUserId.isEmpty) {
-                            return SizedBox(
+                            return const SizedBox(
                               height: 50,
                               child: Text("Belum ada Postingan"),
                             );
@@ -178,7 +188,9 @@ class _ProfilePageState extends State<ProfilePage> {
                           );
                         },
                       ),
+
                       const SizedBox(height: 24),
+
                       const Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -192,10 +204,10 @@ class _ProfilePageState extends State<ProfilePage> {
                       Consumer<FavoritProvider>(
                         builder: (context, favorit, child) {
                           if (favorit.isLoading) {
-                            return CircularProgressIndicator();
+                            return const CircularProgressIndicator();
                           }
                           if (favorit.favoritList.isEmpty) {
-                            return SizedBox(
+                            return const SizedBox(
                               height: 50,
                               child: Text("Belum ada modul favorit."),
                             );
@@ -206,6 +218,49 @@ class _ProfilePageState extends State<ProfilePage> {
                           );
                         },
                       ),
+
+                      const SizedBox(height: 24),
+                      const Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Riwayat Laporan",
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+
+                      Consumer<ReportProvider>(
+                        builder: (context, rp, child) {
+                          if (rp.isLoading) {
+                            return const SizedBox(
+                              height: 50,
+                              child: Center(child: CircularProgressIndicator()),
+                            );
+                          }
+
+                          if (rp.errorMessage != null && rp.reports.isEmpty) {
+                            return SizedBox(
+                              height: 50,
+                              child: Text(rp.errorMessage!),
+                            );
+                          }
+
+                          if (rp.reports.isEmpty) {
+                            return const SizedBox(
+                              height: 50,
+                              child: Text("Belum ada riwayat laporan."),
+                            );
+                          }
+                          return ReportList(
+                            listReport: rp.reports,
+                            direction: Axis.horizontal,
+                            maxItems: 3,
+                          );
+                        },
+                      ),
+
                       const SizedBox(height: 16),
                       if (auth.authData?.user.role == 'admin')
                         Column(
@@ -253,6 +308,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
 
                       const SizedBox(height: 20),
+
                       ElevatedButton(
                         onPressed: () {
                           Navigator.pushNamed(context, AppRoutes.editProfile);
@@ -265,7 +321,9 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                         child: const Text("Settings Account"),
                       ),
+
                       const SizedBox(height: 12),
+
                       OutlinedButton(
                         onPressed: () async {
                           final authProvider = context.read<AuthProvider>();
@@ -275,11 +333,14 @@ class _ProfilePageState extends State<ProfilePage> {
                           final modulProvder = context.read<ModulProvider>();
                           final favoritProvider =
                               context.read<FavoritProvider>();
+                          final reportProvider = context.read<ReportProvider>();
+
                           authProvider.logout();
                           authorProvider.clearAuthor();
                           kategoriProvider.clearKategori();
                           modulProvder.clearModul();
                           favoritProvider.clearFavorit();
+                          reportProvider.clear();
 
                           Navigator.pushNamedAndRemoveUntil(
                             context,

@@ -104,141 +104,141 @@ class _ReportsPageState extends State<ReportsPage> {
                               child: const Text('Lihat'),
                             ),
                             const Spacer(),
-
-                            IconButton(
-                              icon: const Icon(Icons.more_vert),
-                              onPressed:
-                                  modulId == null
-                                      ? null
-                                      : () async {
-                                        final action = await showModalBottomSheet<
-                                          String
-                                        >(
-                                          context: context,
-                                          showDragHandle:
-                                              true, // butuh Flutter versi baru, kalau error hapus saja
-                                          builder: (sheetContext) {
-                                            return SafeArea(
-                                              child: Column(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  ListTile(
-                                                    leading: const Icon(
-                                                      Icons.visibility_off,
-                                                    ),
-                                                    title: const Text(
-                                                      'Hide (Reject)',
-                                                    ),
-                                                    onTap:
-                                                        () => Navigator.pop(
-                                                          sheetContext,
-                                                          'hide',
-                                                        ),
-                                                  ),
-                                                  ListTile(
-                                                    leading: const Icon(
-                                                      Icons.delete,
-                                                      color: Colors.red,
-                                                    ),
-                                                    title: const Text('Delete'),
-                                                    textColor: Colors.red,
-                                                    iconColor: Colors.red,
-                                                    onTap:
-                                                        () => Navigator.pop(
-                                                          sheetContext,
-                                                          'delete',
-                                                        ),
-                                                  ),
-                                                ],
-                                              ),
-                                            );
-                                          },
-                                        );
-
-                                        if (action == null) return;
-
-                                        if (action == 'hide') {
-                                          final ok = await rp.hideModul(
-                                            token: token,
-                                            modulId: modulId,
-                                          );
-                                          if (!context.mounted) return;
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                ok
-                                                    ? 'Modul di-hide (reject)'
-                                                    : (rp.errorMessage ??
-                                                        'Gagal'),
-                                              ),
-                                            ),
-                                          );
-                                          if (ok) await _refreshReports();
-                                        }
-
-                                        if (action == 'delete') {
-                                          final confirm = await showDialog<
-                                            bool
+                            if (auth.authData?.user.role == 'admin')
+                              IconButton(
+                                icon: const Icon(Icons.more_vert),
+                                onPressed:
+                                    modulId == null
+                                        ? null
+                                        : () async {
+                                          final action = await showModalBottomSheet<
+                                            String
                                           >(
                                             context: context,
-                                            builder:
-                                                (ctx) => AlertDialog(
-                                                  title: const Text(
-                                                    'Hapus modul?',
-                                                  ),
-                                                  content: const Text(
-                                                    'Tindakan ini permanen dan tidak bisa dibatalkan.',
-                                                  ),
-                                                  actions: [
-                                                    TextButton(
-                                                      onPressed:
-                                                          () => Navigator.pop(
-                                                            ctx,
-                                                            false,
-                                                          ),
-                                                      child: const Text(
-                                                        'Batal',
+                                            showDragHandle:
+                                                true, // butuh Flutter versi baru, kalau error hapus saja
+                                            builder: (sheetContext) {
+                                              return SafeArea(
+                                                child: Column(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    ListTile(
+                                                      leading: const Icon(
+                                                        Icons.visibility_off,
                                                       ),
+                                                      title: const Text(
+                                                        'Hide (Reject)',
+                                                      ),
+                                                      onTap:
+                                                          () => Navigator.pop(
+                                                            sheetContext,
+                                                            'hide',
+                                                          ),
                                                     ),
-                                                    TextButton(
-                                                      onPressed:
-                                                          () => Navigator.pop(
-                                                            ctx,
-                                                            true,
-                                                          ),
-                                                      child: const Text(
-                                                        'Hapus',
+                                                    ListTile(
+                                                      leading: const Icon(
+                                                        Icons.delete,
+                                                        color: Colors.red,
                                                       ),
+                                                      title: const Text('Delete'),
+                                                      textColor: Colors.red,
+                                                      iconColor: Colors.red,
+                                                      onTap:
+                                                          () => Navigator.pop(
+                                                            sheetContext,
+                                                            'delete',
+                                                          ),
                                                     ),
                                                   ],
                                                 ),
-                                          );
-                                          if (confirm != true) return;
-
-                                          final ok = await rp
-                                              .deleteModulAsAdmin(
-                                                token: token,
-                                                modulId: modulId,
                                               );
-                                          if (!context.mounted) return;
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                ok
-                                                    ? 'Modul dihapus permanen'
-                                                    : (rp.errorMessage ??
-                                                        'Gagal'),
-                                              ),
-                                            ),
+                                            },
                                           );
-                                          if (ok) await _refreshReports();
-                                        }
-                                      },
-                            ),
+
+                                          if (action == null) return;
+
+                                          if (action == 'hide') {
+                                            final ok = await rp.hideModul(
+                                              token: token,
+                                              modulId: modulId,
+                                            );
+                                            if (!context.mounted) return;
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                  ok
+                                                      ? 'Modul di-hide (reject)'
+                                                      : (rp.errorMessage ??
+                                                          'Gagal'),
+                                                ),
+                                              ),
+                                            );
+                                            if (ok) await _refreshReports();
+                                          }
+
+                                          if (action == 'delete') {
+                                            final confirm = await showDialog<
+                                              bool
+                                            >(
+                                              context: context,
+                                              builder:
+                                                  (ctx) => AlertDialog(
+                                                    title: const Text(
+                                                      'Hapus modul?',
+                                                    ),
+                                                    content: const Text(
+                                                      'Tindakan ini permanen dan tidak bisa dibatalkan.',
+                                                    ),
+                                                    actions: [
+                                                      TextButton(
+                                                        onPressed:
+                                                            () => Navigator.pop(
+                                                              ctx,
+                                                              false,
+                                                            ),
+                                                        child: const Text(
+                                                          'Batal',
+                                                        ),
+                                                      ),
+                                                      TextButton(
+                                                        onPressed:
+                                                            () => Navigator.pop(
+                                                              ctx,
+                                                              true,
+                                                            ),
+                                                        child: const Text(
+                                                          'Hapus',
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                            );
+                                            if (confirm != true) return;
+
+                                            final ok = await rp
+                                                .deleteModulAsAdmin(
+                                                  token: token,
+                                                  modulId: modulId,
+                                                );
+                                            if (!context.mounted) return;
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                  ok
+                                                      ? 'Modul dihapus permanen'
+                                                      : (rp.errorMessage ??
+                                                          'Gagal'),
+                                                ),
+                                              ),
+                                            );
+                                            if (ok) await _refreshReports();
+                                          }
+                                        },
+                              ),
                           ],
                         ),
                       ],
