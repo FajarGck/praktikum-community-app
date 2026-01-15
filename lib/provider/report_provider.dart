@@ -14,6 +14,7 @@ class ReportProvider with ChangeNotifier {
   List<ReportModel> _reports = [];
   List<ReportModel> get reports => _reports;
 
+  // Submit Laporan Baru
   Future<String> submitReport({
     required String token,
     required int modulId,
@@ -52,29 +53,40 @@ class ReportProvider with ChangeNotifier {
       _reports = await _service.getPendingReports(token: token);
     } catch (e) {
       _errorMessage = e.toString();
+      _reports = []; // Kosongkan jika error
     } finally {
       _isLoading = false;
       notifyListeners();
     }
   }
 
-  // BARU: Fetch untuk USER BIASA (Data Sendiri)
+  // --- PERBAIKAN DI SINI ---
+  // Fetch untuk USER BIASA (Data User Itu Sendiri)
   Future<void> fetchUserReports({
     required String token,
     required int userId,
   }) async {
     _isLoading = true;
     _errorMessage = null;
-    notifyListeners();
+    notifyListeners(); // Memberitahu UI loading mulai
+    
     try {
-      _reports = await _service.getUserReports(token: token, userId: userId);
+      // Panggil service getUserReports yang sudah diperbaiki
+      final data = await _service.getUserReports(token: token, userId: userId);
+      
+      // Simpan ke variable _reports agar muncul di ProfilePage
+      _reports = data; 
+      
     } catch (e) {
+      print("Error fetchUserReports: $e");
       _errorMessage = e.toString();
+      _reports = [];
     } finally {
       _isLoading = false;
-      notifyListeners();
+      notifyListeners(); // Memberitahu UI data siap
     }
   }
+  // -------------------------
 
   Future<bool> hideModul({required String token, required int modulId}) async {
     try {

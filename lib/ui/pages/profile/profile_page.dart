@@ -61,7 +61,10 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
           context.read<FavoritProvider>().getFavorit(token),
           context.read<ModulProvider>().fetchModul(token: token),
-          context.read<ReportProvider>().fetchPendingReports(token: token),
+          context.read<ReportProvider>().fetchUserReports(
+            token: token, 
+            userId: currentUserId
+          ),
         ]);
       } catch (e) {
         if (mounted) {
@@ -91,7 +94,10 @@ class _ProfilePageState extends State<ProfilePage> {
         userId: currentUserId,
       );
       favoritProvider.getFavorit(auth.token!);
-      reportProvider.fetchPendingReports(token: auth.token!);
+      reportProvider.fetchUserReports(
+        token: auth.token!, 
+        userId: currentUserId
+      );
     }
   }
 

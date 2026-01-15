@@ -4,6 +4,8 @@ import 'package:tugas_akhir/config/api.dart';
 import 'package:tugas_akhir/models/report_model.dart';
 
 class ReportService {
+  
+  // 1. CREATE REPORT
   Future<Map<String, dynamic>> createReport({
     required String token,
     required int modulId,
@@ -25,7 +27,7 @@ class ReportService {
     throw Exception(data['message'] ?? 'Gagal mengirim report');
   }
 
-  // Khusus Admin: Mengambil SEMUA laporan
+  // 2. GET ALL REPORTS (ADMIN ONLY)
   Future<List<ReportModel>> getPendingReports({required String token}) async {
     final uri = Uri.parse(ApiEndpoints.report);
     final response = await http.get(
@@ -41,26 +43,35 @@ class ReportService {
     throw Exception(data['message'] ?? 'Gagal mengambil laporan');
   }
 
-  // BARU: Khusus User Biasa: Mengambil laporan milik user sendiri
+  // 3. GET USER REPORTS (USER BIASA) -> INI PERBAIKANNYA
   Future<List<ReportModel>> getUserReports({
     required String token,
     required int userId,
   }) async {
-    // Memanggil endpoint: GET /report/:userId
+    // Kita tambahkan userId ke URL agar Backend tahu ini request spesifik user
+    // Endpoint menjadi: .../api/report/123
     final uri = Uri.parse('${ApiEndpoints.report}/$userId');
+    
     final response = await http.get(
       uri,
-      headers: {'Authorization': 'Bearer $token'},
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token'
+      },
     );
 
     final data = jsonDecode(response.body) as Map<String, dynamic>;
+    
     if (response.statusCode == 200) {
       final List list = (data['data'] ?? []) as List;
       return list.map((e) => ReportModel.fromJson(e)).toList();
     }
+    
+    // Handle error message dari backend
     throw Exception(data['message'] ?? 'Gagal mengambil riwayat laporan');
   }
 
+  // 4. RESOLVE REPORT (ADMIN ONLY)
   Future<void> resolveReport({
     required String token,
     required int reportId,
@@ -76,6 +87,7 @@ class ReportService {
     throw Exception(data['message'] ?? 'Gagal resolve report');
   }
 
+  // 5. UPDATE STATUS MODUL (Reject/Hide)
   Future<void> updateModulStatus({
     required String token,
     required int modulId,
@@ -96,6 +108,7 @@ class ReportService {
     throw Exception(data['message'] ?? 'Gagal update status modul');
   }
 
+  // 6. DELETE MODUL (ADMIN)
   Future<void> adminDeleteModul({
     required String token,
     required int modulId,

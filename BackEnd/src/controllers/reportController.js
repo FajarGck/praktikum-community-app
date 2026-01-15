@@ -1,4 +1,4 @@
-const reportService = require('../services/reportService')
+const reportService = require('../services/reportService');
 
 const createReport = async (req, res) => {
   try {
@@ -46,16 +46,19 @@ const getReportById = async (req, res) => {
     res.status(400).json({ code: 400, message: error.message });
   }
 };
+
+
 const getReportByUserId = async (req, res) => {
   const userId = parseInt(req.params.userId, 10);
   try{
-    const data = await reportService.getReportById(userId);
+    const data = await reportService.getReportByUserId(userId);
     res.status(200).json({ code: 200, message: "OK", data });
 
   } catch (error) {
     res.status(400).json({ code: 400, message: error.message });
   }
 };
+// -----------------------------
 
 const resolveReport = async (req, res) => {
   try {
