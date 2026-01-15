@@ -36,9 +36,15 @@ const getReportById = async (userId) => {
   return reportRepository.getReportById(userId);
 };
 
+const getReportByUserId = async (userId) => {
+  return reportRepository.getReportByUserId(userId);
+};
+
+
 module.exports = {
   createReport,
   getAllReports,
   resolveReport,
-  getReportById
+  getReportById,
+  getReportByUserId
 };

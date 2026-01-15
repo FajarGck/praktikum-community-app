@@ -25,6 +25,7 @@ class ReportService {
     throw Exception(data['message'] ?? 'Gagal mengirim report');
   }
 
+  // Khusus Admin: Mengambil SEMUA laporan
   Future<List<ReportModel>> getPendingReports({required String token}) async {
     final uri = Uri.parse(ApiEndpoints.report);
     final response = await http.get(
@@ -38,6 +39,26 @@ class ReportService {
       return list.map((e) => ReportModel.fromJson(e)).toList();
     }
     throw Exception(data['message'] ?? 'Gagal mengambil laporan');
+  }
+
+  // BARU: Khusus User Biasa: Mengambil laporan milik user sendiri
+  Future<List<ReportModel>> getUserReports({
+    required String token,
+    required int userId,
+  }) async {
+    // Memanggil endpoint: GET /report/:userId
+    final uri = Uri.parse('${ApiEndpoints.report}/$userId');
+    final response = await http.get(
+      uri,
+      headers: {'Authorization': 'Bearer $token'},
+    );
+
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    if (response.statusCode == 200) {
+      final List list = (data['data'] ?? []) as List;
+      return list.map((e) => ReportModel.fromJson(e)).toList();
+    }
+    throw Exception(data['message'] ?? 'Gagal mengambil riwayat laporan');
   }
 
   Future<void> resolveReport({

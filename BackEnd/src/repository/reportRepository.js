@@ -69,10 +69,30 @@ const getReportById = async (userId) => {
   })
 }
 
+const getReportByUserId = async (userId) => {
+  return prisma.report.findMany({
+    where: { user_id: userId},
+    include: {
+      modul: {
+        select: {
+          modul_id: true,
+          judul: true,
+          thumbnail_url: true,
+          status: true,
+          penulis: { select: { user_id: true, username: true } },
+          kategori: { select: { kategori_id: true, nama_kategori: true } }
+        }
+      },
+      users: { select: { user_id: true, username: true, email: true } }
+    }
+  })
+}
+
 module.exports = {
   findByUserAndModul,
   createReport,
   getAllReports,
   resolveReport,
-  getReportById
+  getReportById,
+  getReportByUserId
 };

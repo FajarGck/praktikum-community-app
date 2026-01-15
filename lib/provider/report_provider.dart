@@ -43,12 +43,31 @@ class ReportProvider with ChangeNotifier {
     }
   }
 
+  // Fetch untuk ADMIN (Semua Data)
   Future<void> fetchPendingReports({required String token}) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
     try {
       _reports = await _service.getPendingReports(token: token);
+    } catch (e) {
+      _errorMessage = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // BARU: Fetch untuk USER BIASA (Data Sendiri)
+  Future<void> fetchUserReports({
+    required String token,
+    required int userId,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+    try {
+      _reports = await _service.getUserReports(token: token, userId: userId);
     } catch (e) {
       _errorMessage = e.toString();
     } finally {
