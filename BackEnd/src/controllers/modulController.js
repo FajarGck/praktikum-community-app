@@ -167,6 +167,14 @@ const updateModul = async (req, res) => {
 const updateModulStatus = async (req, res) => {
   try {
     const modulId = parseInt(req.params.modulId, 10);
+    
+    // --- TAMBAHAN DEBUGGING (Lihat di Terminal Backend) ---
+    console.log("=== DEBUG UPDATE STATUS ===");
+    console.log("Modul ID:", modulId);
+    console.log("Body yang diterima:", req.body);
+    console.log("Status yang dikirim:", req.body.status);
+    // -----------------------------------------------------
+
     if (isNaN(modulId)) {
       return res.status(400).json({ code: 400, message: "modulId tidak valid" });
     }
@@ -176,9 +184,13 @@ const updateModulStatus = async (req, res) => {
       return res.status(400).json({ code: 400, message: "status is required" });
     }
 
-    const allowed = ['pending', 'approved', 'reject'];
+    // PASTIKAN LIST INI BENAR-BENAR SUDAH DIUPDATE DI FILE YANG AKTIF
+    const allowed = ['pending', 'approved', 'reject', 'suspended', 'banned']; 
+    
+    console.log("Apakah status valid?", allowed.includes(status)); // Cek log ini
+
     if (!allowed.includes(status)) {
-      return res.status(400).json({ code: 400, message: "status tidak valid" });
+      return res.status(400).json({ code: 400, message: "status tidak valid (rejected by controller)" });
     }
 
     const data = await modulService.updateModulStatus(modulId, status);
@@ -189,6 +201,7 @@ const updateModulStatus = async (req, res) => {
       data
     });
   } catch (error) {
+    console.log("ERROR:", error.message);
     res.status(400).json({ code: 400, message: error.message });
   }
 };

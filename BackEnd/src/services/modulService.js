@@ -72,13 +72,13 @@ const updateModulStatus = async (modulId, status) => {
 
   const existing = await modulRepository.getDetailModulById(modulId);
   if (!existing) throw new Error('Modul tidak ditemukan!');
-
   return await prisma.$transaction(async (tx) => {
     const updatedModul = await tx.modul.update({
       where: { modul_id: modulId },
       data: { status },
     });
-    if (status === 'reject') {
+    
+    if (status === 'approved' || status === 'banned' || status === 'reject') {
       await tx.report.updateMany({
         where: {
           modul_id: modulId,
@@ -90,6 +90,13 @@ const updateModulStatus = async (modulId, status) => {
 
     return updatedModul;
   });
+};
+
+const adminDeleteModul = async (modulId) => {
+  const existing = await modulRepository.getDetailModulById(modulId);
+  if (!existing) throw new Error('Modul tidak ditemukan!');
+
+  return await updateModulStatus(modulId, 'banned');
 };
 
 const deleteModul = async (modulId, loggedInUserId) => {
@@ -106,12 +113,6 @@ const deleteModul = async (modulId, loggedInUserId) => {
     throw new Error('Akses ditolak: Anda bukan pemilik modul ini.');
   }
 
-  return await modulRepository.deleteModul(modulId);
-};
-
-const adminDeleteModul = async (modulId) => {
-  const existing = await modulRepository.getDetailModulById(modulId);
-  if (!existing) throw new Error('Modul tidak ditemukan!');
   return await modulRepository.deleteModul(modulId);
 };
 

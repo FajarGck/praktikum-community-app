@@ -12,7 +12,7 @@ class ModulModel {
   int? penulisId;
   DateTime? createdAt;
   DateTime? updatedAt;
-  String? status;
+  String? status; // Akan menerima: pending, approved, reject, suspended, banned
   UsersModel? penulis;
   KategoriModel? kategori;
   List<KomentarModel>? komentar;
@@ -44,33 +44,27 @@ class ModulModel {
       deskripsi: json['deskripsi'],
       kategoriId: json['kategori_id'],
       penulisId: json['penulis_id'],
-      createdAt:
-          json['created_at'] != null
-              ? DateTime.parse(json['created_at'])
-              : null,
-      updatedAt:
-          json['updated_at'] != null
-              ? DateTime.parse(json['updated_at'])
-              : null,
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'])
+          : null,
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'])
+          : null,
       status: json['status'],
-      penulis:
-          json['penulis'] != null ? UsersModel.fromJson(json['penulis']) : null,
-      kategori:
-          json['kategori'] != null
-              ? KategoriModel.fromJson(json['kategori'])
-              : null,
-      komentar:
-          json['komentar'] != null
-              ? List<KomentarModel>.from(
-                json['komentar'].map((x) => KomentarModel.fromJson(x)),
-              )
-              : [],
-      langkah:
-          json['langkah'] != null
-              ? List<LangkahModel>.from(
-                json['langkah'].map((x) => LangkahModel.fromJson(x)),
-              )
-              : [],
+      penulis: json['penulis'] != null
+          ? UsersModel.fromJson(json['penulis'])
+          : null,
+      kategori: json['kategori'] != null
+          ? KategoriModel.fromJson(json['kategori'])
+          : null,
+      komentar: json['komentar'] != null
+          ? List<KomentarModel>.from(
+              json['komentar'].map((x) => KomentarModel.fromJson(x)))
+          : [],
+      langkah: json['langkah'] != null
+          ? List<LangkahModel>.from(
+              json['langkah'].map((x) => LangkahModel.fromJson(x)))
+          : [],
       isFavorit: json['is_favorit'] ?? false,
     );
   }

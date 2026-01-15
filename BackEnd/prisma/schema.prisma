@@ -96,6 +96,8 @@ enum modul_status {
   pending
   reject
   approved
+  suspended
+  banned
 }
 
 model report {

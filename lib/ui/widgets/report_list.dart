@@ -30,7 +30,7 @@ class ReportList extends StatelessWidget {
       );
     }
     return SizedBox(
-      height: 242,
+      height: 282,
       child: ListView.separated(
         scrollDirection: direction,
         itemCount: itemCount,
@@ -208,7 +208,7 @@ String _buildUserUpdateText({
     return 'Update: Modul kemungkinan sudah dihapus.';
   }
 
-  if (modulStatus == 'reject' || modulStatus == 'hidden' || modulStatus == 'inactive') {
+  if (modulStatus == 'reject' || modulStatus == 'hidden' || modulStatus == 'inactive' || modulStatus == "suspended") {
     return 'Update: Modul disembunyikan oleh admin.';
   }
 
@@ -216,12 +216,12 @@ String _buildUserUpdateText({
     return 'Update: Menunggu ditinjau admin.';
   }
 
-  if (reportStatus == 'resolved') {
-    return 'Update: Ditinjau admin (tidak ada tindakan pada modul).';
+  if (modulStatus == 'banned') {
+    return 'Update: Modul dibanned oleh admin.';
   }
 
-  if (reportStatus == 'rejected') {
-    return 'Update: Laporan ditolak admin.';
+  if (modulStatus == 'approved') {
+    return 'Update: Laporan telah diselesaikan oleh admin.\nModul sudah diperbaiki';
   }
 
   return 'Update: Status belum diketahui.';

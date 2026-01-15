@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:tugas_akhir/models/report_model.dart';
+import 'package:tugas_akhir/service/modul_service.dart';
 import 'package:tugas_akhir/service/report_service.dart';
 
 class ReportProvider with ChangeNotifier {
   final _service = ReportService();
+  final ModulService _modulService = ModulService();
 
   bool _isLoading = false;
   String? _errorMessage;
@@ -90,10 +92,10 @@ class ReportProvider with ChangeNotifier {
 
   Future<bool> hideModul({required String token, required int modulId}) async {
     try {
-      await _service.updateModulStatus(
+      await _modulService.updateModulStatus(
         token: token,
         modulId: modulId,
-        status: 'reject',
+        status: 'suspended',
       );
       return true;
     } catch (e) {
@@ -102,13 +104,33 @@ class ReportProvider with ChangeNotifier {
       return false;
     }
   }
+  Future<bool> updateModulStatus({
+  required String token,
+  required int modulId,
+  required String status,
+}) async {
+  try {
+    // Memanggil service yang sudah kamu buat sebelumnya
+    await _modulService.updateModulStatus(
+      token: token,
+      modulId: modulId,
+      status: status,
+    );
+    return true;
+  } catch (e) {
+    _errorMessage = e.toString();
+    notifyListeners();
+    return false;
+  }
+}
 
-  Future<bool> deleteModulAsAdmin({
-    required String token,
-    required int modulId,
-  }) async {
+  Future<bool> banModul({required String token, required int modulId}) async {
     try {
-      await _service.adminDeleteModul(token: token, modulId: modulId);
+      await _modulService.updateModulStatus(
+        token: token,
+        modulId: modulId,
+        status: 'banned',
+      );
       return true;
     } catch (e) {
       _errorMessage = e.toString();

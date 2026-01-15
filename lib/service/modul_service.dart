@@ -205,6 +205,34 @@ class ModulService {
     }
   }
 
+  Future<bool> updateModulStatus({
+    required String token,
+    required int modulId,
+    required String status,
+  }) async {
+    // Asumsi: endpoint update status adalah /api/modul/:id/status
+    // Kita gunakan helper getDetailModulById untuk mendapatkan base URL modul, lalu tambah /status
+    final urlString = ApiEndpoints.getDetailModulById(modulId);
+    final uri = Uri.parse('$urlString/status');
+
+    final response = await http.patch(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({'status': status}),
+    );
+
+    final responseData = jsonDecode(response.body) as Map<String, dynamic>;
+
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      throw Exception(responseData['message'] ?? 'Gagal mengupdate status modul');
+    }
+  }
+
   Future<ModulModel> deleteModul({
     required String token,
     required int modulId,
